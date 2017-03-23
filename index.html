@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+    </head>
+    <body>
+    	<form id="form">
+    	<input type="text" id="myField" name="">
+    	<input type="submit" id="submit" name="">
+    	</form>
+    </body>
+    <script type="text/javascript">
+    	var promise1 = new Promise(function(resolve, reject) {
+                var xhr = new XMLHttpRequest();
+                var url = urls.urlListChapters.replace(0, specificationId);
+                xhr.open('GET', url, true);
+                xhr.responseType = 'json';
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        alert(xhr.response);
+                        resolve(xhr.response);
+                    } else {
+                        reject(new Error(xhr.statusText));
+                    }
+                };
+                xhr.onerror = function() {
+                    reject(new Error("Network error"));
+                };
+                xhr.send();
+            });
+            promise1.then(function(data) {
+                alert('Your public IP address is: ' + data);
+            }, function(status) {
+                alert('Something went wrong.');
+            });
+    </script>
+</html>

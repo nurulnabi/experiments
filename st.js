@@ -1,0 +1,679 @@
+/**
+ *  0.1
+ *  EntryHandler, Perform as middleware for different routes
+ *
+ *  @ CreatioSoft All Rights Reserved.
+ *  Date: 30 Nov, 2016
+ *  programmer: Pankaj Jatav <pankaj@creatiosoft.com>
+ *  Javascript file entryHandler.js
+ */
+
+var keySets = require('undot')('utils/keysDictionary.js');
+var channelHandler = require('./channelHandler.js');
+var broadcastHandler = require('./broadcastHandler.js');
+var achievementHandler = require('./achievementHandler.js');
+var imageHandler = require('./imageHandler.js');
+var friendsHandler = require('./friendsHandler.js');
+var invitesHandler = require('./invitesHandler.js');
+var dealyValues = require('undot')('../shared/config/defaultValues.json')['dealy'];
+var helper = require('undot')('app/utils/helper.js');
+var helperInstance = new helper();
+// var channelHandler;
+
+module.exports = function(app) {
+  return new Handler(app);
+};
+
+/**
+ * This is connector handler constructor
+ * @constructor
+ * @param {app} app context app
+ */
+var Handler = function(app) {
+  this.app = app;
+};
+
+/**
+*
+* Call to create new session of user
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  status of session creation in callback
+*
+*/
+Handler.prototype.entry = function(data, session, next) {
+	var that = this;
+  	var playerId = data.playerId;
+  	var channelService =  that.app.get('channelService');
+	var sessionService = that.app.get('sessionService');
+	var userSession = sessionService.getByUid(playerId);
+	if(userSession){
+		userSession[0].set('isConnected', false);
+		channelService.pushMessageByUids( 'isConnected', {msg:'Update Session'}, [{uid: playerId, sid: that.app.get('serverId') }])
+		setTimeout(function(app, playerId, session , channelService){
+				var sessionService = app.get('sessionService');
+				var userSession = sessionService.getByUid(playerId);
+				console.log(userSession);
+				if(!userSession[0].get('isConnected')){
+						channelService.pushMessageByUids( 'sessionRemoved',{msg:'Your session is expired'},[{uid: playerId, sid: app.getServerId()}])
+	                sessionService.kick(playerId, function(err){
+	                  if(err){
+	                    next(null,{success: false, code: 409, msg: 'Unable to process request.'});
+	                  } 
+	                });
+	        session.bind(playerId);
+					session.set('playerId', playerId);
+					session.push('playerId', function(err) {
+						if(err) {
+							next(null,{success: false, code: 409, msg: 'Unable to process request.'});
+							console.error('set playerId for session service failed! error is : %j', err.stack);
+						}
+					});
+					session.on('closed', onUserLeave.bind(null, app));
+					next(null,{success: true, code: 200, msg: 'Session Created'}); 
+        } else {
+        	next(null, {success:false, code: 400, msg: 'Session alredy exists'});
+        }
+	    }.bind(this, that.app , playerId, session ,channelService), dealyValues.isConnected);
+	} else {
+		session.bind(playerId);
+		session.set('playerId', playerId);
+		session.push('playerId', function(err) {
+			if(err) {
+				next(null,{success: false, code: 409, msg: 'Unable to process request.'});
+				console.error('set playerId for session service failed! error is : %j', err.stack);
+			}
+		});
+		session.on('closed', onUserLeave.bind(null, that.app));
+		next(null,{success: true, code: 200, msg: 'Session Created'});
+	}
+};
+
+
+/**
+*
+* Call to update the user info
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of user updation in callback
+*
+*/
+Handler.prototype.updateUser = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'updateUser', data, function(response){
+		if(response.success) {
+			that.app.rpc.logic.userRemote.update(session, data.playerId,
+			  data.data, function(res) {
+			  	next(null, res);
+			}); 
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to get the user info
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {user} info in callback
+*
+*/
+Handler.prototype.getUser = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'getUser', data, function(response){
+		if(response.success) {
+			that.app.rpc.logic.userRemote.get(session, data.playerId,
+			  data.keys, function(res) {
+			  	next(null, res);
+			});
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to get the user rank
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {rank} of the player in callback
+*
+*/
+Handler.prototype.getRank = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'getRank', data, function(response){
+		if(response.success) {
+			that.app.rpc.logic.userRemote.rank(session, data.playerId, function(res) {
+			  	next(null, res);
+			});
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to get leaderboard
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {leaderboard} in callback
+*
+*/
+Handler.prototype.getLeaderboard = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'getLeaderboard', data, function(response){
+		if(response.success) {
+			that.app.rpc.logic.leaderboardRemote.get(session, data.playerId, function(res) {
+			  	next(null, res);
+			});
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to join a channel
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {channel} info in callback
+*
+*/
+Handler.prototype.joinChannel = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'joinChannel', data, function(response){
+		if(response.success) {
+			channelHandler.join(session, data, that.app, function(res){
+				helperInstance.addCountToJoinChannel(data, res, function(result){
+					next(null, result);
+				})
+			})
+		} else {
+			next(new Error("Somthing wicked happend").stack,response);
+		}
+	});
+}
+
+
+
+/**
+ * after game initiator will response to start game
+ * @param {  object}   data    	room info
+ * @param {  object}   session 	session object for user
+ * @param {  Function} next    	callback at client side
+ * @return {object}    response in callback at client side
+ * */
+Handler.prototype.initiateGame = function(data,session,next){
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'initiateGame', data, function(response){
+		if(response.success){
+			channelHandler.initiateGame(session,data,that.app,function(res){
+				if(res.success){
+					next(null, {success:true, code:200, msg:"Game Started"})
+				}else{
+					next(res);		//either opponent left the game or db error
+				}
+			});
+		}else{
+			next(response);
+		}
+	});
+}
+
+/**
+ * once both friends have joined the same room they can chat before starting the game
+ * @param { Object} session session object
+ * @param { Object} app     context object
+ * @param { Object} data    user data containing message
+ * @return {callback}       return callback
+ */
+Handler.prototype.sendMessage = function(data, session, next){
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'sendMessage', data, function(response){
+		if(response.success){
+			broadcastHandler.sendMessage(session, that.app, data, function(res){
+				if(res.success){
+					next(null, res);
+				}else{
+					next(res);
+				}
+			});
+		}else{
+			next(response);
+		}
+	});
+}
+
+/**
+*
+* Call when player hit other player in game
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of hit
+*
+*/
+Handler.prototype.hitPlayer = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'hitPlayer', data, function(response){
+		if(response.success) {
+			broadcastHandler.hit(data, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call when user final hit other player
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of final hit
+*
+*/
+Handler.prototype.finalHitPlayer = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'finalHitPlayer', data, function(response){
+		if(response.success) {
+			broadcastHandler.finalHit(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to sned user out of game
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of leave player
+*
+*/
+Handler.prototype.leavePlayer = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'leavePlayer', data, function(response){
+		if(response.success) {
+			broadcastHandler.leavePlayer(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to get achivement list
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {achivement} list in callback
+*
+*/
+Handler.prototype.playerAchievementList = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'playerAchievementList', data, function(response){
+		if(response.success) {
+			achievementHandler.getList(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to collect user achivement
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of achievement collection
+*
+*/
+Handler.prototype.achivementCollect = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'achivementCollect', data, function(response){
+		if(response.success) {
+			achievementHandler.collect(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to collect user achivement
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of achievement collection
+*
+*/
+Handler.prototype.sendFriendRequest = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'sendFriendRequest', data, function(response){
+		if(response.success) {
+			friendsHandler.sendFriendRequest(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to accept friend request
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of accepted friend request
+*
+*/
+Handler.prototype.acceptFriendRequest = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'acceptFriendRequest', data, function(response){
+		if(response.success) {
+			friendsHandler.acceptFriendRequest(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+/**
+*
+* Call to decline friend request
+* 
+* @param  {next}    callback take the response from the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of friend request
+* 
+* @return  {status} of decline friend request
+*
+*/
+Handler.prototype.declineFriendRequest = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'declineFriendRequest', data, function(response){
+		if (response.success) {
+			friendsHandler.declineFriendRequest(data, session, that.app, function(res){
+				next(null,res);
+			})
+		} else {
+			next(null,response);
+		}
+	})
+};
+
+/**
+*
+* Call to get friend list
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {friend} list
+*
+*/
+Handler.prototype.getFriendsList = function(data, session, next) {
+	var that = this;
+	console.log('Handler.prototype.getFriendsList: data: ',data);
+	that.app.rpc.logic.friendsRemote.getFriends(session, data, function(res) {
+		if(!res.success){
+			next({success: false, code: 409, msg: 'Unable to process request'});
+		} else {
+      		next(null,res);
+      	}
+	});
+	// keySets.validateKeySets('req', 'connector', 'acceptFriendRequest', data, function(response){
+		// if(response.success) {
+			// friendsHandler.acceptFriendRequest(data, session, that.app, function(res){
+				// next(null, res);
+			// })
+		// } else {
+			// next(null,response);
+		// }
+	// });
+}
+
+/**
+*
+* Call to get friend list with online | offline status
+* 
+* @param  {next}    callback take the response from the function
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {friend} list
+*
+*/
+Handler.prototype.getFriendsWithStatus = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'getFriendsWithStatus', data, function(response){
+		if (response.success) {
+			friendsHandler.getFriendsWithStatus(data, session, that.app, function(res){
+				next(null,res);
+			})
+		} else {
+			next(null,response);
+		}
+	})
+};
+
+/**
+*
+* Call to send game invitaion
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user having player info, room info
+* 
+* @return  {status} of invitation
+*
+*/
+Handler.prototype.sendInvite = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'sendInvite', data, function(response){
+		if(response.success) {
+			invitesHandler.sendInvite(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+
+
+Handler.prototype.getInvitesList = function(data, session, next) {
+	var that = this;
+	console.log('Handler.prototype.getInvitesList', data);
+	that.app.rpc.logic.invitesRemote.getInvites(session, data, function(res){
+		if (!res.success) {
+			next({success: false, code: 409, msg: 'Unable to process request'});
+		} else {
+			next(null,res);
+		};
+	})
+};
+
+
+/**
+*
+* Call to decline game invitaion
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user having playerId,roomId
+* 
+* @return  {status} of decline
+*
+*/
+Handler.prototype.declineInvite = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'declineInvite', data, function(response){
+		if(response.success) {
+			invitesHandler.declineInvite(data, session, that.app, function(res){
+				next(null, res);
+			})
+		} else {
+			next(null,response);
+		}
+	});
+};
+
+
+/**
+*
+* Call to check is connected
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of achievement collection
+*
+*/
+Handler.prototype.isConnected = function(data, session, next) {
+	var that = this;
+	keySets.validateKeySets('req', 'connector', 'isConnected', data, function(response){
+		if(response.success) {
+			session.set('isConnected', true);
+			session.push('isConnected', function(err) {
+				if(err) {
+					next(null,{success: false, code: 409, msg: 'Unable to process request.'});
+					console.error('set playerId for session service failed! error is : %j', err.stack);
+				}
+			});
+			next(null, {success:true, code: 200, msg: 'Session updateed'});
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+
+/**
+*
+* Call to logout
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of logout
+*
+*/
+Handler.prototype.logout = function(data, session, next) {
+	var that = this;
+	var sessionService =  that.app.get('sessionService');
+	keySets.validateKeySets('req', 'connector', 'logout', data, function(response){
+		if(response.success) {
+			setTimeout(function(){			
+				sessionService.kick(data.playerId, function(err){
+					if(err){
+						next(null,{success: false, code: 400, msg: 'Unable to logout.'});
+					}
+				});
+			}.bind(sessionService),500);
+			next(null,{success: true, code: 200, msg: 'Logout successfully'});
+		} else {
+			next(null,response);
+		}
+	});
+}
+
+
+/**
+*
+* Call to upload image
+* 
+* @param  {next}    callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {status} of logout
+*
+*/
+Handler.prototype.upload = function(data, session, next) {
+	var that = this;
+	imageHandler.upload(data.image);
+}
+
+
+/**
+ * User log out handler
+ *
+ * @param {Object} app current application
+ * @param {Object} session current session object
+ *
+ */
+var onUserLeave = function(app, session) {
+	console.log('session closed');
+	if(session.get('channelId')){
+		var data = {
+			playerId: session.get('playerId'),
+			channelId: session.get('channelId')
+		}
+		broadcastHandler.disconnectPlayer(data, session, app);
+	}
+	if(!session || !session.uid) {
+		return;
+	}
+};

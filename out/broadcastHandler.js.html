@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: broadcastHandler.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: broadcastHandler.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *  0.1
+ *  BroadcastHandler, Send differnet type of broadcast to users.
+ *
+ *  @ CreatioSoft All Rights Reserved.
+ *  Date: 7 Dec, 2016
+ *  programmer: Pankaj Jatav &lt;pankaj@creatiosoft.com>
+ *  Javascript file broadcastHandler.js
+ */
+
+"use strict";
+/** @type {Object} 
+*   @namespace
+**/
+var broadcastHandler = {}
+var async = require('async');
+var channelHandler = require('./channelHandler.js');
+var config = require('undot')('../shared/config/config.json');
+var helper = require('undot')('app/utils/helper.js');
+var helperInstance = new helper();
+
+
+/**
+*
+* Call when game is ready
+* @param  {app}     Object   current application object
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast} boradcast of game ready
+*
+*/
+broadcastHandler.gameReady = function(session, app, data){
+	var channelService = app.get('channelService');
+	var channel = channelService.getChannel(data.channelId, true);
+	var uids = [
+		{uid:channel.getMembers()[0], sid:app.get('serverId')},
+		{uid:channel.getMembers()[1], sid:app.get('serverId')}
+	]
+
+	var findData = {
+		query: {
+			_id: { $in : channel.getMembers()}
+		},
+		sort: {},
+		limit: 2
+	}
+
+	app.rpc.logic.userRemote.find(session, findData, function(res) {
+		if(!res.success){
+			var resData = {
+				success: false, 
+				code: 409, 
+				msg: 'Unable to process request'
+			}
+			channelService.pushMessageByUids('gameStart', resData , uids);
+		} else {
+			if(res.data.length){ // &amp;&amp; res.data.length == 2){ 
+				var usersData = res.data.map(function(data){
+					var res = {
+						id: data._id,
+						name: data.name,
+						imageUrl: data.imageUrl
+					};
+					// res[data._id] = {
+					// 	name : data.name,
+					// }
+					return res;
+				})
+				var resData = {
+					success: true, 
+					code: 200, 
+					msg: 'Game Started Successfully',
+					data: usersData
+				}	
+				channelService.pushMessageByUids('gameStart',  resData, uids);
+			} else {
+				var resData = {
+					success: false, 
+					code: 409, 
+					msg: 'Unable to process request'
+				}
+				channelService.pushMessageByUids('gameStart', resData , uids);
+			}
+		}
+	});
+}
+
+
+/**
+ * Once game is ready the player joining second will have to wait for initiator reponse
+ * @param  {object} session session object
+ * @param  {object} app     context object
+ * @param  {object} data    channelId,playerId
+ * @return {broadcastmessages} broadcast messages to both player
+ */
+broadcastHandler.waitForInitiator = function(session,app,data){
+	var channelService = app.get('channelService');
+	var channel 	   = channelService.getChannel(data.channelId,false);
+	var status 		   = {success:true, code:200, msg:"Game is ready to start"};
+	channel.pushMessage('bothJoined',status);
+}
+
+
+/**
+ * once both friends have joined the same room they can chat before starting the game
+ * @param  {Object} session session object
+ * @param  {Object} app     context object
+ * @param  {Object} data    user data containing message
+ * @return {broadcastmessage}        broadcast the message to both player
+ */
+broadcastHandler.sendMessage = function(session, app, data, cb){
+	var that 		   = this;
+		that.app 	   = app;
+		that.session   = session;
+	var userId		   = session.uid;
+	var keys 		   = ["name"];
+
+	var channelService = app.get('channelService');
+	var channel 	   = channelService.getChannel(data.channelId,false);
+	// var uids 		   = channel.getMembers().map(function(uid){
+	// 					 		 return {uid:uid, sid:app.get('serverId')};
+	// 					 });
+
+	that.app.rpc.logic.userRemote.get(that.session, userId, keys, function(res){	//get name of the sender
+		if(res.success){
+			var message = {success:true, code:200,  uid:userId, 	msg: data.msg,	from:res.data.name};
+			channel.pushMessage('chatBeforGame', message);
+			cb({success:true, code:200, info:"message broadcasted"});
+		}else{
+			cb(res);
+		}
+	});
+}
+
+/**
+*
+* Call when user hits
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response form the fuction
+* @param  {data }   object   data of user
+* 
+* @return  {boradcast} of hit to other player
+*
+*/
+broadcastHandler.hit = function(data, app, cb){
+	var channelService = app.get('channelService');
+	var channel = channelService.getChannel(data.channelId, true);
+	if(channel &amp;&amp; !app.get('win-'+data.channelId)) {
+		var members = channel.getMembers()
+		var uids = [
+			{uid:members[1-members.indexOf(data.playerId)], sid:app.get('serverId')}
+		]
+		var resData = {
+			success: true,
+			code: 200,
+			msg: 'You got shot'
+		}
+		channelService.pushMessageByUids('playerHit',  resData, uids);
+		cb({success: true, code: 200, msg: 'Hit Successfully'});
+	} else {
+		if(app.get('win-'+data.channelId)) {
+			cb({success: false, code: 410, msg: 'Game Over' });
+		} else {
+			cb({success: false, code: 410, msg: 'Unable to process request' });
+			// cb({success: false, code: 409, msg: 'Unable to process request' });
+		}
+	}
+}
+
+/**
+*
+* Call when user hit player
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return { messageBroadcast } broadcast of final hit
+*
+*/
+broadcastHandler.finalHit = function(data, session, app, cb){
+	var channelService = app.get('channelService');
+	var channel = channelService.getChannel(data.channelId, true);
+	if(channel &amp;&amp; !app.get('win-'+data.channelId)) {
+		var members = channel.getMembers()
+		var uids = [
+			{uid:members[1-members.indexOf(data.playerId)], sid:app.get('serverId')}
+		]
+		var resData = {
+			success: true,
+			code: 200,
+			msg: 'You got shot final hit'
+		}
+		channelService.pushMessageByUids('playerFinalHit',  resData, uids);
+		app.set('win-'+data.channelId, data.playerId);
+		this.gameOver(data, session, app);
+		cb({success: true, code: 200, msg: 'Final Hit Successfully'});
+	} else {
+		if(app.get('win-'+data.channelId)) {
+			cb({success: false, code: 410, msg: 'Game Over' });
+		} else {
+			cb({success: false, code: 410, msg: 'Unable to process request' });
+			// cb({success: false, code: 409, msg: 'Unable to process request' });
+		}
+	}
+}
+
+
+/**
+*
+* Call when game over
+* @param  {app}     Object   current application object
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast} broadcast of game player
+*
+*/
+broadcastHandler.gameOver = function(data, session, app){
+	var that = this;
+	var channelService = app.get('channelService');
+	var channel = channelService.getChannel(data.channelId, true);
+	if(channel.getMembers().length > 1) {
+		var resData = {
+			success: true,
+			code: 200,
+			msg: 'Game Over',
+			data: {
+				winner: app.get('win-'+data.channelId)
+			}
+		}
+		var uids = channel.getMembers().map(function(data){
+			return {uid:data, sid:app.get('serverId')};
+		})
+
+		var channelFindData = {
+			query:{
+
+			},
+			sort: {},
+			limit:1
+		};
+		app.rpc.logic.channelRemote.find(session, channelFindData, function(res) {
+			if(!res.success || !res.data.length){
+				console.log(res);
+			} else {
+				var bet = res.data[0].roomBet;
+				resData.data.bet = bet;
+				//update win player
+				var winData = {
+					bet:bet,
+					type: 'win'
+				}
+				app.rpc.logic.userRemote.updateGameOver(session, resData.data.winner ,winData, function(res) {
+					that.achivementUnlock({playerId:resData.data.winner} , session, app)
+				})
+				
+				//update defeat player
+				var members = channel.getMembers()
+				var defeater =	members[1-members.indexOf(resData.data.winner)];
+				var defeatData = {
+					bet:bet,
+					type: 'defeat'
+				}
+				app.rpc.logic.userRemote.updateGameOver(session, defeater, defeatData, function(res) {
+					channelHandler.distroyChannel(data.channelId, session, app);
+				})
+
+			}
+			channelService.pushMessageByUids('gameOver',  resData, uids);	
+		});
+	} else {
+		channelHandler.distroyChannel(data.channelId, session, app);
+	}
+	
+}
+
+/**
+*
+* Call when user leave the game
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return  {messageBroadcast} broadcast of user leave
+*
+*/
+broadcastHandler.leavePlayer = function(data, session, app, cb){
+	var channelService = app.get('channelService');
+	var channel = channelService.getChannel(data.channelId, true);
+	if(channel &amp;&amp; !app.get('win-'+data.channelId)) {
+		var members = channel.getMembers();
+		if(members.length > 1){
+			var uids = [
+				{uid:members[1-members.indexOf(data.playerId)], sid:app.get('serverId')}
+			]
+			var resData = {
+				success: true,
+				code: 200,
+				msg: 'Player Leave the Game'
+			}
+			channelService.pushMessageByUids('leavePlayer',  resData, uids);
+			app.set('win-'+data.channelId, uids[0].uid);
+			this.gameOver(data, session, app);
+		}
+		channelHandler.distroyChannel(data.channelId, session, app);
+		cb({success: true, code: 200, msg: 'Leave Successfully'});
+	} else {
+		cb({success: false, code: 409, msg: 'Unable to process request' });
+	}
+}
+
+/**
+*
+* Call when user disconnected from the game
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast} broadcast of disconnect player
+*
+*/
+broadcastHandler.disconnectPlayer = function(data, session, app){
+	var channelService = app.get('channelService');
+	var channel = channelService.getChannel(data.channelId, true);
+	if(channel &amp;&amp; !app.get('win-'+data.channelId)) {
+		var members = channel.getMembers();
+		if(members.length > 1){
+			var uids = [
+				{uid:members[1-members.indexOf(data.playerId)], sid:app.get('serverId')}
+			]
+			var resData = {
+				success: true,
+				code: 200,
+				msg: 'Player Disconnect from the Game'
+			}
+			channelService.pushMessageByUids('disconnectPlayer',  resData, uids);
+			app.set('win-'+data.channelId, uids[0].uid);
+		}
+		this.gameOver(data, session, app);
+	}
+}
+
+/**
+*
+* Call when user unlock a achievement
+* @param  {app}     Object   current application object
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast} broadcast of user unlock achievement
+*
+*/
+broadcastHandler.achivementUnlock = function(data, session, app) {
+	var params = {
+		data: data,
+		app: app,
+		session: session
+	}
+	async.waterfall([
+		async.apply(getPlayerById, params),
+		getAchivementByWins],
+		function(err, result){
+			if(!err){
+				if(result.achievement.length){
+					var channelService = app.get('channelService');
+					var uids = [
+						{uid:data.playerId, sid:app.get('serverId')}
+					]
+					var resData = {
+						achievement: result.achievement[0],
+						msg: "You won "+ result.achievement[0].coins +' coins'
+					}
+					
+					var insertData = {
+						achievementId: result.achievement[0]._id,
+						playerId: result.data.playerId,
+						isCollect: false
+					};
+					params.app.rpc.logic.achievementRemote.insert(params.session, insertData,function(res) {
+						console.log(res);
+					});
+
+					channelService.pushMessageByUids('achivementUnlock',  resData, uids);
+				}
+				
+			}
+		}
+	)
+}
+
+/**
+*
+* Call when user send a friend request
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast}  broadcast of frend request player
+*
+*/
+broadcastHandler.friendRequest = function(data, session, app) {
+	var channelService = app.get('channelService');
+	var uids = [
+				{uid: data.friendId, sid:app.get('serverId')}
+			]
+	var findData = {
+		query:{
+			_id: data.playerId
+		},
+		sort: {},
+		limit: 1,
+	}
+	app.rpc.logic.userRemote.find(session, findData, function(res) {
+		if(res.success &amp;&amp; res.data.length) {
+			var dataToBroadcast = {
+				success: true,
+				msg:'Friend request recieved',
+				code:200,
+				data: {
+					id: res.data[0]._id,
+					name: res.data[0].name,
+					status: config.requestStatus.pending
+				}	
+			}
+			helperInstance.pendingRequestCount(data.friendId, function(result) {
+				if (result.success) {
+					dataToBroadcast.data.pendingFriendRequestCount = result.data;
+				}
+				channelService.pushMessageByUids('getFriendReqest',  dataToBroadcast, uids);
+			})
+      	}
+	});
+}
+
+/**
+*
+* Call when user send a friend request
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast} broadcast of frend request player
+*
+*/
+broadcastHandler.acceptFriendRequest = function(data, session, app) {
+	var channelService = app.get('channelService');
+	var uids = [
+				{uid: data.friendId, sid:app.get('serverId')}
+			]
+	var findData = {
+		query:{
+			_id: data.playerId
+		},
+		sort: {},
+		limit: 1,
+	}
+	app.rpc.logic.userRemote.find(session, findData, function(res) {
+		if(res.success &amp;&amp; res.data.length) {
+			var dataToBroadcast = {
+				success: true,
+				msg:'Friend request accepted',
+				code:200,
+				data: {
+					id: res.data[0]._id,
+					name: res.data[0].name,
+					status: config.requestStatus.accepted,
+					pendingFriendRequestCount: data.pendingFriendRequestCount
+				}	
+			}
+			channelService.pushMessageByUids('acceptFriendRequest',  dataToBroadcast, uids);
+      	}
+	});
+}
+
+/**
+*
+* Call when user deletes a friend
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response from the function
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast} broadcast of friend deleted
+*
+*/
+broadcastHandler.deleteFriend = function(data, session, app) {
+	var channelService = app.get('channelService');
+	var uids = [
+				{uid: data.friendId, sid:app.get('serverId')}
+			]
+	var findData = {
+		query:{
+			_id: data.playerId
+		},
+		sort: {},
+		limit: 1,
+	}
+	app.rpc.logic.userRemote.find(session, findData, function(res) {
+		if(res.success &amp;&amp; res.data.length) {
+			var dataToBroadcast = {
+				success: true,
+				msg:'Friend Deleted',
+				code:200,
+				data: {
+					id: res.data[0]._id,
+					name: res.data[0].name	
+				}			
+			}
+			channelService.pushMessageByUids('deleteFriend',  dataToBroadcast, uids);
+			console.log('broadcast done: broadcastHandler.deleteFriend');
+      	}
+	});
+}
+
+
+/**
+*
+* Call when user send a game invite
+* @param  {app}     Object   current application object
+* @param  {cb}      callback take the response form the fuction
+* @param  {session} object   session object of user
+* @param  {data}    object   data of user
+* 
+* @return {messageBroadcast} broadcast of game invite
+*
+*/
+broadcastHandler.sendInvite = function(data, session, app) {
+	var channelService = app.get('channelService');
+	var uids = [
+				{uid: data.friendId, sid:app.get('serverId')}
+			]
+	var findData = {
+		query:{
+			_id: data.playerId
+		},
+		sort: {},
+		limit: 1,
+	}
+	app.rpc.logic.userRemote.find(session, findData, function(res) {
+		if(res.success &amp;&amp; res.data.length) {
+			var dataToBroadcast = {
+				success: true,
+				msg:'Game Invite recieved',
+				code:200,
+				data: {}
+			}
+			dataToBroadcast.data = {
+					friendId: res.data[0]._id,
+					friendName: res.data[0].name,
+					roomId: data.roomId,
+					status: config.requestStatus.pending,
+					roomName: data.roomName,
+					roomBet: data.roomBet
+				}
+				// count pendingGameInviteCount -> friendId
+				helperInstance.pendingGameInviteCount(data.friendId, function(result){
+					if (result.success) {
+						dataToBroadcast.data["pendingGameInviteCount"] = result.data;
+					} else{
+						//one in millions case
+						dataToBroadcast.data["pendingGameInviteCount"] = 0;
+					};
+					channelService.pushMessageByUids('getGameInvite',  dataToBroadcast, uids);
+				})
+      	}
+	});
+}
+module.exports = broadcastHandler;
+
+/**
+*
+* Call to get player by Id
+* @param  {callbacl}  callback take the response form the fuction
+* @param  {params}    object   data of user
+* 
+* @return {object} player info
+*
+*/
+function getPlayerById(params, callback){
+	var findData =  {
+		query:{
+			_id:params.data.playerId
+		},
+		sort:{},
+		limit:1
+	}
+	params.app.rpc.logic.userRemote.find(params.session, findData, function(res) {
+		if(!res.success){
+			callback('Error Occues');
+		} else {
+			params.user = res.data;
+			callback(null,params);
+		}
+	});
+};
+
+/**
+*
+* Call to get achievement by user win
+* 
+* @param  {callbacl}  callback take the response form the fuction
+* @param  {params}    object   data of user
+* 
+* @return  {object} achieement info
+*
+*/
+function getAchivementByWins(params, callback){
+	var findData =  {
+		query: {
+			wins: params.user[0].wins
+		},
+		sort:{},
+		limit:1
+	}
+	params.app.rpc.logic.achievementRemote.find(params.session, findData,function(res) {
+		if(!res.success){
+			callback('Error Occues');
+		} else {
+			params.achievement = res.data;
+			callback(null,params);
+		}
+	});
+};</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Handler.html">Handler</a></li></ul><h3>Namespaces</h3><ul><li><a href="achievementHandler.html">achievementHandler</a></li><li><a href="broadcastHandler.html">broadcastHandler</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allAchieventList">allAchieventList</a></li><li><a href="global.html#allUnlockAchieventList">allUnlockAchieventList</a></li><li><a href="global.html#allUserAchieventList">allUserAchieventList</a></li><li><a href="global.html#getAchivementByWins">getAchivementByWins</a></li><li><a href="global.html#getPlayerById">getPlayerById</a></li><li><a href="global.html#keySets">keySets</a></li><li><a href="global.html#onUserLeave">onUserLeave</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Feb 17 2017 11:16:14 GMT+0530 (IST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

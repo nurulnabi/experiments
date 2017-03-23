@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Async Dislogs Example</title>
+  <style type="text/css">
+    #dialog {
+      width:      200px;
+      margin:     auto;
+      padding:    10px;
+      border:     thin solid black;
+      background: lightgreen;
+    }
+    .hidden {
+      display: none;
+    }
+   </style>
+  <script src="//cdn.jsdelivr.net/bluebird/3.4.7/bluebird.js"></script>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+      var time = document.getElementById('time-stamp');
+      clockTick();
+      setInterval(clockTick, 1000);
+      function clockTick() {
+        time.innerHTML = new Date().toLocaleTimeString();
+      }
+    });
+    function promptPromise(message) {
+      return new Promise(function(resolve, reject) {
+        var result = window.prompt(message);
+        if (result != null) {
+          resolve(result);
+        } else {
+          reject();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      var button = document.getElementById('action');
+      var output = document.getElementById('prompt');
+
+      button.addEventListener('click', function() {
+        promptPromise('What is your name?')
+          .then(function(name) {
+            output.innerHTML = '' + name;
+          })
+          .catch(function() {
+            output.innerHTML = '¯\\_(ツ)_/¯';
+          });
+      });
+    });
+  </script>
+</head>
+<body>
+  <p>The current time is <span id="time-stamp"></span>.</p>
+  <p>Your name is <span id="prompt"></span>.</p>
+  <button id="action">Set Name</button>
+</body>
+</html>

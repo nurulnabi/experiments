@@ -1,0 +1,13 @@
+{
+	"updateSuccess":"Contact updated Successfully",
+	"updateFieldNull":"you need to pass an array(update) indicating which fields to update",
+	"updateDuplicate":"You trying to update with the same values",
+	"updateUndefinedField":"You have provided wrong field to update",
+	"getAllDataFailed":"Unable to get all data",
+	"arr":[
+		"md",
+		"noor",
+		"nabi",
+		"ansari"
+	]
+}

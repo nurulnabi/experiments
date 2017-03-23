@@ -1,0 +1,6 @@
+{
+	"address": {"building": "1007", "coord": [-73.856077, 40.848447]},
+	"grades": [{"date": {"$date": 1393804800000}, "grade": "A", "score": 2}], 
+    "name": "Morris Park Bake Shop", 
+	"restaurant_id": "30075445"
+}

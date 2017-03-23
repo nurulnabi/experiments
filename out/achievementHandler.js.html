@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: achievementHandler.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: achievementHandler.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ *  0.1
+ *  AchievementHandler, Perfrom achievement related query
+ *
+ *  @ CreatioSoft All Rights Reserved.
+ *  Date: 9 Dec, 2016
+ *  programmer: Pankaj Jatav &lt;pankaj@creatiosoft.com>
+ *  Javascript file achievementHandler.js
+ */
+
+"use strict";
+/** @type {Object}
+*   @namespace
+*/
+var achievementHandler = {};
+var async = require('async');
+
+
+/**
+*
+* Call to get achievement list of user
+* @memberof achievementHandler 
+* @param  app     Object   current application object
+* @param  cb      callback take the response form the fuction
+* @param  session object   session object of user
+* @param  data    object   data of user
+* 
+* @return  achivement list in callback
+*
+*/
+achievementHandler.getList = function(data, session, app, cb) {
+	var params = {
+		data: data,
+		app: app,
+		session: session
+	}
+	async.waterfall([
+		async.apply(allAchieventList, params),
+		allUnlockAchieventList,
+		allUserAchieventList],
+		function(err, result){
+			if(err){
+				cb({success: false, code: 409, msg: 'Unable to process request'});
+			} else {
+				cb({success: true, code: 200, msg: 'Find Successfully', data:result.res});
+			}
+		}
+	)
+};
+
+/**
+* Call to collect achievement
+* @memberof achievementHandler 
+* @param  app     Object   current application object
+* @param  cb      callback take the response form the fuction
+* @param  session object   session object of user
+* @param  data    object   data of user
+* 
+* @return  status of achivement collect in callback
+*
+*/
+achievementHandler.collect = function(data, session, app, cb) {
+	var updateData = {
+		selector: {
+			achievementId: data.achievementId,
+			playerId: data.playerId
+		},
+		update: {
+			'$set':{
+				isCollect: true
+			}
+		}
+	};
+	app.rpc.logic.achievementRemote.update(session, updateData, function(res) {
+		if(!res.success){
+			cb({success: false, code: 409, msg: 'Unable to process request'});
+      	}
+        cb({success: true, code: 200, msg: 'Achivement Updated successfully'});
+	});
+}
+
+module.exports = achievementHandler;
+
+/**
+* Call to get all achievement
+* 
+* @param  session  object   session object of user
+* @param  params   object   data of user
+* 
+* @return  all achivements in callback
+*
+*/
+function allAchieventList(params, callback){
+	params.app.rpc.logic.achievementRemote.list(params.session, function(res) {
+		if(!res.success){
+			callback('Error Occues');
+		} else {
+			params.allAchieventList = res.data;
+			callback(null,params);
+		}
+	});
+}
+
+/**
+* Call to get all user unlock achievement
+* 
+* @param  session  object   session object of user
+* @param  params   object   data of user
+* 
+* @return  all unlock achivements in callback
+*
+*/
+function allUnlockAchieventList(params, callback){
+	var findData = {
+		query:{ playerId : params.data.playerId },
+		sort:{},
+		limit:-1
+	}
+	params.app.rpc.logic.achievementRemote.findUnlock(params.session, findData, function(res) {
+		if(!res.success){
+			callback('Error Occues');
+		} else {
+			params.allUnlockAchieventList = res.data;
+			callback(null,params);
+		}
+	});
+}
+
+/**
+* Call to get all user achievement
+* 
+* @param  session  object   session object of user
+* @param  params   object   data of user
+* 
+* @return  all user achivements in callback
+*
+*/
+function allUserAchieventList(params, callback){
+	params.res = {};
+	params.allAchieventList.map(function(data){
+		params.res[data._id] = {
+			win: data.wins,
+			coin: data.coins,
+			isUnlock: false,
+			isCollect: false
+		}
+		params.allUnlockAchieventList.map(function(unlockData){
+			if(data._id == unlockData.achievementId){
+				params.res[data._id].isUnlock = true;
+				params.res[data._id].isCollect = unlockData.isCollect;
+			}
+		});
+	});
+	callback(null,params);
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Handler.html">Handler</a></li></ul><h3>Namespaces</h3><ul><li><a href="achievementHandler.html">achievementHandler</a></li><li><a href="broadcastHandler.html">broadcastHandler</a></li></ul><h3>Global</h3><ul><li><a href="global.html#allAchieventList">allAchieventList</a></li><li><a href="global.html#allUnlockAchieventList">allUnlockAchieventList</a></li><li><a href="global.html#allUserAchieventList">allUserAchieventList</a></li><li><a href="global.html#getAchivementByWins">getAchivementByWins</a></li><li><a href="global.html#getPlayerById">getPlayerById</a></li><li><a href="global.html#keySets">keySets</a></li><li><a href="global.html#onUserLeave">onUserLeave</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a> on Fri Feb 17 2017 11:16:14 GMT+0530 (IST)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

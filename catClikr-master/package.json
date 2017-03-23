@@ -1,0 +1,11 @@
+{
+  "name": "cat-clicker",
+  "version": "1.0.0",
+  "description": "Learning Project-Advanced JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "MD NOORUL NABI ANSARI <noor.csarchitect@gmail.com>",
+  "license": "ISC"
+}
