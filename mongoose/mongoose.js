@@ -1,8 +1,8 @@
 /*
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:21:11
-* @Last Modified by:   noor
-* @Last Modified time: 2017-03-23 16:41:09
+* @Last Modified by:   nurulnabi
+* @Last Modified time: 2017-03-25 15:06:11
 */
 
 var mongoose = require('mongoose');
@@ -22,5 +22,6 @@ var storySchema = Schema({
 	fans: [{type: Number, ref:'Person'}]
 });
 
+personSchema.index({_id:1},{unique:false});
 var Story = mongoose.model("Story",storySchema);
 var Person = mongoose.model("Person", personSchema);
