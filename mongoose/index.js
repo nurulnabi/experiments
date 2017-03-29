@@ -2,19 +2,40 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:20:42
 * @Last Modified by:   nurulnabi
-* @Last Modified time: 2017-03-25 15:07:02
+* @Last Modified time: 2017-03-30 00:44:07
 */
 
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
-var readySchema = require('./mongoose');
-var Person = mongoose.model("Person");
-var Story = mongoose.model("Story");
-var users = require('./user');
+// var readySchema = require('./mongoose');
+// var Person = mongoose.model("Person");
+// var Story = mongoose.model("Story");
+// var users = require('./user');
 
-// Story
-// 	.findOne({title: "Once upon a timex."})
-// 	.populate('_creator')
-// 	.exec(function(err, story){
-// 		console.log(`Error: ${err}, story:${story}`);
-// 	})
+
+// // Story
+// // 	.findOne({title: "Once Upon a Time"})
+// // 	.populate('_creator', 'name')
+// // 	.exec(function(err, story){
+// // 		console.log(`Error: ${err}, story:${story}`);
+// // 	})
+// 
+
+mongoose.connect('mongodb://localhost/crunchbase');
+
+var connection = mongoose.connection;
+
+connection.on('error', console.error.bind(console, 'connection error:'));
+connection.once('open', function () {
+
+    connection.db.collection("companies", function(err, collection){
+		    collection.aggregate([
+		{$unwind:"$offices"},
+		{$match:{"offices.state_code":"CA"}},
+		{$project:{"offices":1, _id:0}}
+		]).exec(function(err, docs){
+		console.log(docs,err);
+		})
+    });
+
+});
