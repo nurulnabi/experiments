@@ -2,33 +2,15 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-02-28 16:41:45
 * @Last Modified by:   noor
-* @Last Modified time: 2017-03-22 18:43:01
+* @Last Modified time: 2017-03-28 17:21:03
 */
 
 
-var firstPromise = function(n){
-	for(var i=0; i<n; i++){
-		if(i==300){
-			if(firstPromise(-500)){
-				return "ansari";
-			}else{
-				return null;
-			}
-		}
-	}
-	return "md";
-};
-
-// console.log(firstPromise(500));
-// 
-
-var obj = {
-	name:"noor",
-	age:23
+var distribute = function(sum, pCount){
+	var half = sum/2;
+	var rest = Math.round(half/pCount);
+	var obj = {};
+	obj.usr = rest;
+	obj.sys = sum-rest;
+	return obj;
 }
-for(var i=0; i<5; i++){
-	obj[i] = i;
-}
-obj['karma'] = "karma"
-
-console.log(obj);
