@@ -2,7 +2,7 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:21:11
 * @Last Modified by:   noor
-* @Last Modified time: 2017-03-31 14:20:42
+* @Last Modified time: 2017-04-04 12:04:22
 */
 
 var mongoose = require('mongoose');
@@ -22,6 +22,7 @@ var storySchema = Schema({
 	fans: [{type: Number, ref:'Person'}]
 });
 
+<<<<<<< HEAD
 var UnitSchema = new Schema({
 	_id:Number,
     name: {
@@ -70,6 +71,9 @@ var member = mongoose.model('Member',MemberSchema);
 var organization = mongoose.model('Organization',OrgSchema);
 
 
+=======
+personSchema.index({_id:1},{unique:false});
+>>>>>>> 1c8b053007f15bb2f669170e73b10598db59983e
 personSchema.query.byAge = function(){
 	return this.find({ age:{$gte:26}});
 }
@@ -94,6 +98,3 @@ personSchema.virtual('myAge').get(function(){
 	min             = Math.floor((age-sec)/60);
 	return min+":"+sec+":"+ms;
 });
-
-var Story = mongoose.model("Story",storySchema);
-var Person = mongoose.model("Person", personSchema);

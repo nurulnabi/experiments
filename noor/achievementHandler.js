@@ -266,9 +266,11 @@ function calculatePercentageCompleted(params, next){
 			var achvmnt = allAchvmnts[achvmntId];
 			if(!achvmnt.isUnlock && user.hasOwnProperty(achvmnt.type)){
 				// var percent = (user[achvmnt.type]/achvmnt.total)*100;
-				var percent = ((user[achvmnt.type] - achvmnt.totalB)/achvmnt.total)*100;
-				console.log(percent,user[achvmnt.type],achvmnt.type,achvmnt.total,"$$$$$$$$$$$$$$$$$$$$$$$");
-				if(user[achvmnt.type] <= achvmnt.total){
+				var diff = Math.abs(user[achvmnt.type] - achvmnt.totalB);
+				var percent = (diff/achvmnt.total)*100;
+				console.log(`percent-${percent},user[achvmnt.type]-${user[achvmnt.type]},achvmnt.type-${achvmnt.type},achvmnt.total,$$$$$$$$$$$$$$$$$$$$$$$`);
+				// if(user[achvmnt.type] <= achvmnt.total){
+				if(diff <= achvmnt.total){
 					achvmnt.percentCompleted = Math.floor(percent);
 				}
 				else{	//that case when user has unlocked this achievement but has not claimed yet.

@@ -838,20 +838,21 @@ broadcastHandler.getAchivementByCategory = function(params){
 				}
 			});
 		});
-
+		console.log(allAchvmnts,"-----------allAchvmnts----------- after comparing----");
 		return allAchvmnts;
 	})
 	.then(function(data){
 		var total = 0;
 		if(data.length > 0){
 			total = data.reduce(function(memo, achvmnt){
-				memo = memo+achvmnt.total;
-				return memo;
+				// memo = memo+achvmnt.total;
+				return memo+achvmnt.total;
 			},0);
 		}
-		findData.query.total = findData.query.total - total;
-
 		console.log(findData,"+++++++++++getAchivementByCategory+++++++++++",total,findData.query.type);
+		findData.query.total = findData.query.total - total;
+		console.log(findData,"+++++++++++getAchivementByCategory+++++++++++",total,findData.query.type);
+
 		return new Promise(function(resolve, reject){
 			params.app.rpc.logic.achievementRemote.getAchivementByCategory(params.session, findData, function(res){
 				if(res.success){

@@ -420,24 +420,24 @@ Helper.prototype.getLockedUnlockedAchvmnts = function(params){
   return new Promise(function(resolve, reject){
     params.app.rpc.logic.achievementRemote.find(params.session, findLocked, function(resLock){
       if(resLock.success){
-        console.log(resLock,"+++++++++resLock++++++++++++++++++");
+        // console.log(resLock,"+++++++++resLock++++++++++++++++++");
         var _ids = resLock.data.map(function(achvmnt){
-            return achvmnt._id;
+            return achvmnt._id.toString();
           });
-          console.log(_ids,"****_ids______________");
+          // console.log(_ids,"****_ids______________");
           var findData =  {
             query: {
               achievementId:{ $in: _ids}, playerId:params.playerId
             },
             sort:{},
-            limit:1
+            limit:0
           }
           params.app.rpc.logic.achievementRemote.findUnlock(params.session, findData, function(resUnlock){
             if(resUnlock.success){
                var data = {};
                data.allLockedAchvmnt = resLock.data;
                data.allUnlckdAchvmnt = resUnlock.data;
-               // console.log(data,"&&&&&&&&&&&&&&&&&&&&Resolve getLockedUnlockedAchvmnts&&&&&&&&&&&&");
+               console.log(data,"&&&&&&&&&&&&&&&&&&&&Resolve getLockedUnlockedAchvmnts&&&&&&&&&&&&");
                resolve(data);
             }else{
               // console.log(data,"&&&&&&&&&&&&&&&&&&&&reject getLockedUnlockedAchvmnts&&&&&&&&&&&&");
