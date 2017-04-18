@@ -1,8 +1,8 @@
 /*
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:21:11
-* @Last Modified by:   nurulnabi
-* @Last Modified time: 2017-03-30 00:44:44
+* @Last Modified by:   noor
+* @Last Modified time: 2017-04-04 12:04:22
 */
 
 var mongoose = require('mongoose');
@@ -12,7 +12,7 @@ var Schema = mongoose.Schema;
 var personSchema = Schema({
 	_id: Number,
 	name:String,
-	age:Number,
+	age:{type:Number, required:false, default:0},
 	stories:[{type: Schema.Types.ObjectId, ref:'Story'}]
 });
 
@@ -22,7 +22,58 @@ var storySchema = Schema({
 	fans: [{type: Number, ref:'Person'}]
 });
 
+<<<<<<< HEAD
+var UnitSchema = new Schema({
+	_id:Number,
+    name: {
+        type: String,
+        required: true
+    },
+    unitNumber: Number,
+    members: [{type:Number, ref:'Member'}],
+    orgs: [{type:Number, ref:'Organization'}]
+});
+
+var OrgSchema = new mongoose.Schema({
+	_id:Number,
+    name: {
+        type: String,
+        required: true
+    },
+    sortIndex: Number,
+    roles: [{type:Number, ref:'Roles'}]
+});
+
+var RoleSchema = new mongoose.Schema({
+	_id:Number,
+    name: String,
+    sortIndex: Number,
+    member: [{
+        type: Number,
+        ref: 'Member'
+    }]
+});
+
+
+var MemberSchema = new mongoose.Schema({
+	_id:Number,
+    name: {
+        first: String,
+        last: String
+    },
+    phone: String,
+    email: String
+});
+
+var unit = mongoose.model('Unit',UnitSchema);
+var role = mongoose.model('Roles',RoleSchema);
+var member = mongoose.model('Member',MemberSchema);
+var organization = mongoose.model('Organization',OrgSchema);
+
+
+=======
 personSchema.index({_id:1},{unique:false});
+>>>>>>> 1c8b053007f15bb2f669170e73b10598db59983e
 personSchema.query.byAge = function(){
 	return this.find({ age:{$gte:26}});
 }
@@ -33,6 +84,10 @@ personSchema.query.selectName = function(){
 
 personSchema.methods.findSimilar = function(){
 	return this.model("Story").find({_creator:this._id});
+}
+
+personSchema.statics.findAndModify = function(query, sort, doc, option, next){
+	return this.collection.findAndModify(query, sort, doc, option, next);
 }
 
 personSchema.virtual('myAge').get(function(){
