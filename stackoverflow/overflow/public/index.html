@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    </head>
+    <body>
+    	<h1>This is MD NOORUL NABI ANSARI</h1>
+    	<button id="getData">Get Data</button>
+    	<button id="sendData">Send Data</button>
+    	<div id="data"></div>
+    	<script type="text/javascript">
+    		$('#getData').click(function(){
+    			$.ajax({
+    				url:"/data",
+    				type:'GET',
+    				data:{name:'noor'},
+    				success: function(data){
+    					console.log(data);
+    				}
+    			});
+    		})
+
+    	</script>
+    </body>
+</html>

@@ -2,14 +2,14 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:20:42
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-04 12:04:10
+* @Last Modified time: 2017-04-17 17:07:30
 */
 
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
 var readySchema = require('./mongoose');
-var Person = mongoose.model("Person");
-var Story = mongoose.model("Story");
+// var Person = mongoose.model("Person");
+// var Story = mongoose.model("Story");
 var users = require('./user');
 
 

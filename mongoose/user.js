@@ -2,16 +2,17 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:45:13
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-04 12:04:43
+* @Last Modified time: 2017-04-18 11:05:01
 */
 
 var mongoose = require('mongoose');
-var Person = mongoose.model("Person");
-var Story = mongoose.model("Story");
-var unit = mongoose.model('Unit');
-var role = mongoose.model('Roles');
-var member = mongoose.model('Member');
-var organization = mongoose.model('Organization');
+// var Person = mongoose.model("Person");
+// var Story = mongoose.model("Story");
+// var unit = mongoose.model('Unit');
+// var role = mongoose.model('Roles');
+// var member = mongoose.model('Member');
+var demo = mongoose.model('demo');
+// var organization = mongoose.model('Organization');
 
 
 // member.create({_id:123, name:{first:"noor", last:"ansari"}, email:"noor@cspl.com", phone:7290950261 }, function(err, doc){
@@ -27,32 +28,32 @@ var organization = mongoose.model('Organization');
 // 	}else{
 // 		console.log(err);
 // 	}
-var aaron = [];
-aaron.push(new Person({ _id: 0, name: 'Aaron', age: 100 }));
-aaron.push(new Person({ _id: 1, name: 'noor', age: 50 }));
-aaron.push(new Person({ _id: 1, name: 'nabi', age: 18 }));
-aaron.push(new Person({ _id: 2, name: 'ansari', age: 24 }));
-aaron.push(new Person({ _id: 0, name: 'md', age: 54 }));
+// var aaron = [];
+// aaron.push(new Person({ _id: 0, name: 'Aaron', age: 100 }));
+// aaron.push(new Person({ _id: 1, name: 'noor', age: 50 }));
+// aaron.push(new Person({ _id: 1, name: 'nabi', age: 18 }));
+// aaron.push(new Person({ _id: 2, name: 'ansari', age: 24 }));
+// aaron.push(new Person({ _id: 0, name: 'md', age: 54 }));
 
-Person.create(aaron,function (err) {
-  if (err) return console.log(err);
+// Person.create(aaron,function (err) {
+//   if (err) return console.log(err);
   
-  var story1 = new Story({
-    title: "Once upon a timex.",
-    _creator: aaron[0]._id    // assign the _id from the person
-  });
+//   var story1 = new Story({
+//     title: "Once upon a timex.",
+//     _creator: aaron[0]._id    // assign the _id from the person
+//   });
   
-  story1.save(function (err) {
-    if (err) return console.log(err);
-    // thats it!
-  });
-});
+//   story1.save(function (err) {
+//     if (err) return console.log(err);
+//     // thats it!
+//   });
+// });
 
-var noor = new Person({
-	_id:999,
-	name:"sfdsfa",
-	age:24
-});
+// var noor = new Person({
+// 	_id:999,
+// 	name:"sfdsfa",
+// 	age:24
+// });
 
 // Person.find().byAge().selectName().exec(function(err,res){
 // 	console.log(err,res);
@@ -78,9 +79,9 @@ var noor = new Person({
 // 	}
 // })
 
-Person.findAndModify({_id:555},[],{$set:{age:444}},{new:true, fields:{}}, function(err, doc){
-	console.log(err, doc);
-})
+// Person.findAndModify({_id:555},[],{$set:{age:444}},{new:true, fields:{}}, function(err, doc){
+// 	console.log(err, doc);
+// })
 
 // unit.findOne({ unitNumber:543 })
 // .populate({
@@ -119,14 +120,14 @@ Person.findAndModify({_id:555},[],{$set:{age:444}},{new:true, fields:{}}, functi
 // // })
 
 
-var usrs = [
-	new Person({_id:123, name:"noor"}),
-	new Person({_id:124, name:"rahul"}),
-	new Person({_id:125, name:"sanjay"}),
-	new Person({_id:126, name:"mukesh"}),
-	new Person({_id:127, name:"ramu"}),
-	new Person({_id:129, name:"saurav"})
-]
+// var usrs = [
+// 	new Person({_id:123, name:"noor"}),
+// 	new Person({_id:124, name:"rahul"}),
+// 	new Person({_id:125, name:"sanjay"}),
+// 	new Person({_id:126, name:"mukesh"}),
+// 	new Person({_id:127, name:"ramu"}),
+// 	new Person({_id:129, name:"saurav"})
+// ]
 
 // var doc = new Person({_id:555, name:"sabji"});
 // doc.save(function(err, res){
@@ -146,10 +147,25 @@ var usrs = [
 // Person.create({_id:888, name:"sambhu"}, function(err, doc){
 //     console.log(err, doc);
 // })
-for(var usr of usrs){
-	age++;
-	console.log("inserted");
-	Person.create({_id:age, name:"noor", age:age}, function(err,doc){
-		console.log(err,doc);
-	})
-}
+// for(var usr of usrs){
+// 	age++;
+// 	console.log("inserted");
+// 	Person.create({_id:age, name:"noor", age:age}, function(err,doc){
+// 		console.log(err,doc);
+// 	})
+// }
+
+// primer.aggregate([
+// 		{$limit:5},
+// 		{$project:{gradesAvg:{$avg:"$grades.score"}, grades:"$grades.score"}}
+// 	], function(err, data){
+// 		console.log(err,data);
+// 	})
+
+// demo.create({name:"noor", sub:{name:"sita"}},function(err, doc){
+// 	console.log(err, doc);
+// })
+
+demo.findOne({}, function(err, doc){
+	console.log(typeof doc.sub, doc.sub.name);
+})

@@ -1,50 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>OverFlow</title>
+	<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 </head>
 <body>
 <div id="data">
 	</div>
 
 <script>
-	var div = document.getElementById("data");
-
-	var dataObj = {
-		name:"XYZ",
-		education:"B.Tech",
-		country:"ABC"
-	};
-	var table		= document.createElement('table');
-	var thead		= document.createElement('thead');
-
-	var thName		= document.createElement('th');
-	var thCountry	= document.createElement('th');
-	var thEducation	= document.createElement('th');
-	thName.innerHTML = "Name";
-	thEducation.innerHTML = "Education";
-	thCountry.innerHTML = "Country"
-
-	thead.appendChild(thName);
-	thead.appendChild(thEducation)
-	thead.appendChild(thCountry)
-
-    var tr = document.createElement('tr');   
-
-    var tdName = document.createElement('td');
-    var tdEducation = document.createElement('td');
-    var tdCountry = document.createElement('td');
-
-    tdName.innerHTML = dataObj.name;
-    tdEducation.innerHTML = dataObj.education;
-    tdCountry.innerHTML = dataObj.country;
-
-    tr.appendChild(tdName);
-    tr.appendChild(tdEducation);
-    tr.appendChild(tdCountry);
-    table.appendChild(thead);
-    table.appendChild(tr);
-    div.appendChild(table);
+	
 
 </script>
 </body>
