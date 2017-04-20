@@ -2,33 +2,25 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-02-09 18:05:28
 * @Last Modified by:   noor
-* @Last Modified time: 2017-03-01 16:31:18
+* @Last Modified time: 2017-04-20 13:20:24
 */
 
-// var lib = require('./lib');
-
-// var desig = "senior software developer";
-
-// lib(function(){
-// 	console.log(desig)
-// 	console.log("inside test.js");
-// })
-
-
-var getObj = require('./fsLoop');
-var names = [
-		"a","b","c","d"
-	];
-
-function ramu(){
-	// getObj(names, function(res){
-	// 	console.log(res);
-	// })
-	getObj().then(function(p){
-		p.forEach(function(pp){
-			console.log(pp);
-		})
-	})
+var nobj = {
+	a:1
 }
 
-ramu();
+var obj = {
+	1:2,
+	name:"noor",
+	obj:nobj
+};
+
+
+console.log(obj.name);
+var a = obj.obj;
+console.log(a);
+obj = null;
+console.log(obj);
+console.log(a);
+a = null;
+console.log(nobj,a);

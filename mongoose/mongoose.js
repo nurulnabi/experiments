@@ -2,15 +2,77 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:21:11
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-18 11:01:22
+* @Last Modified time: 2017-04-20 11:52:43
 */
 
 var mongoose = require('mongoose');
 mongoose.connect("mongodb://localhost:27017/demo");
 var Schema = mongoose.Schema;
 
-var Sub = {
-	name: String
+var personSchema = Schema({
+	_id: Number,
+	name:String,
+	age:{type:Number, required:false, default:0},
+	stories:[{type: Schema.Types.ObjectId, ref:'Story'}]
+});
+
+var storySchema = Schema({
+	_creator:{ type: Number, ref: 'Person'},
+	title: String,
+	fans: [{type: Number, ref:'Person'}]
+});
+
+var UnitSchema = new Schema({
+	_id:Number,
+    name: {
+        type: String,
+        required: true
+    },
+    unitNumber: Number,
+    members: [{type:Number, ref:'Member'}],
+    orgs: [{type:Number, ref:'Organization'}]
+});
+
+var OrgSchema = new mongoose.Schema({
+	_id:Number,
+    name: {
+        type: String,
+        required: true
+    },
+    sortIndex: Number,
+    roles: [{type:Number, ref:'Roles'}]
+});
+
+var RoleSchema = new mongoose.Schema({
+	_id:Number,
+    name: String,
+    sortIndex: Number,
+    member: [{
+        type: Number,
+        ref: 'Member'
+    }]
+});
+
+
+var MemberSchema = new mongoose.Schema({
+	_id:Number,
+    name: {
+        first: String,
+        last: String
+    },
+    phone: String,
+    email: String
+});
+
+var unit = mongoose.model('Unit',UnitSchema);
+var role = mongoose.model('Roles',RoleSchema);
+var member = mongoose.model('Member',MemberSchema);
+var organization = mongoose.model('Organization',OrgSchema);
+
+
+personSchema.index({_id:1},{unique:false});
+personSchema.query.byAge = function(){
+	return this.find({ age:{$gte:26}});
 }
 
 var demo = new Schema({
@@ -79,13 +141,6 @@ var demo = new Schema({
 // var organization = mongoose.model('Organization',OrgSchema);
 var organization = mongoose.model('demo',demo);
 
-
-// =======
-// personSchema.index({_id:1},{unique:false});
-// >>>>>>> 1c8b053007f15bb2f669170e73b10598db59983e
-// personSchema.query.byAge = function(){
-// 	return this.find({ age:{$gte:26}});
-// }
 
 // personSchema.query.selectName = function(){
 // 	return this.find({name:"raju"}).select({_id:0, name:1, age:1});
