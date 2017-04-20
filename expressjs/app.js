@@ -5,6 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var sessionService = require('./services/session/sessionService');
+var Channel = require('./services/channel/channel');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -13,6 +14,9 @@ var app = express();
 
 //put the sessionService in the app to utilize it
 app.sessionService = new sessionService();
+
+//set the channel in the app
+app.channelService = Channel(app);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

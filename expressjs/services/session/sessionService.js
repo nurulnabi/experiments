@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-20 12:05:47
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-20 16:26:57
+* @Last Modified time: 2017-04-20 17:16:39
 */
 
 var Session = require('./session.js');
@@ -36,5 +36,12 @@ SessionService.prototype.remove = function(uid){
 	delete this.sessions[uid];
 	this.adjustSid();
 };
+
+SessionService.prototype.getSessionsByUid = function(uids){
+	return uids.reduce(function(memo, uid){
+		memo.push(this.sessions[uid]);
+		return memo;
+	},[]);
+}
 
 module.exports = SessionService;
