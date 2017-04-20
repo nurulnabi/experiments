@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-20 12:05:47
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-20 17:16:39
+* @Last Modified time: 2017-04-20 19:22:24
 */
 
 var Session = require('./session.js');
@@ -27,12 +27,12 @@ SessionService.prototype.create = function(uid, socket, expireAt){
 	return session;
 };
 
-SessionService.prototype.remove = function(uid){
+SessionService.prototype.remove = function(uid, reason){
 	var session = this.sessions[uid];
 	if(!session){
 		return;
 	}
-	session.closed();
+	session.closed(reason);
 	delete this.sessions[uid];
 	this.adjustSid();
 };
@@ -44,4 +44,19 @@ SessionService.prototype.getSessionsByUid = function(uids){
 	},[]);
 }
 
-module.exports = SessionService;
+SessionService.prototype.getByUid = function(uid){
+	return this.sessions[uid];
+}
+
+SessionService.prototype.removeExpired = function(){
+	for(var uid in this.sessions){
+		var session = this.sessions[uid];
+		if(session.isExpired()){
+			this.remove(uid, "Session Expired For: "+uid);
+		}
+	}
+}
+
+module.exports = function(){
+	return new SessionService();
+};

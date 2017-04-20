@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-20 12:05:02
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-20 16:45:42
+* @Last Modified time: 2017-04-20 18:01:46
 */
 
 var EventEmitter = require('events').EventEmitter;
@@ -10,7 +10,6 @@ var ST_INITED = 0;
 var ST_CLOSED = 1;
 
 var Session = function(sid, socket, service, expireAt){
-	// EventEmitter.call(this);
 
 	this.id 	 			= sid;
 	this.uid 				= null;					// uid given to the user
@@ -88,4 +87,9 @@ Session.prototype.clear = function(){
 	this.__socket__ 		= null;
 	this.__sessionService__ = null;
 }
+
+Session.prototype.getUserId = function(){
+	return this.userId;
+}
+
 module.exports = Session;

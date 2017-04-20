@@ -4,17 +4,36 @@
         <meta charset="utf-8">
         <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
         <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    </head>
+    <body>
+        <button id="getWithToken">getWithToken</button>
+        <button id="getWithoutToken">getWithoutToken</button>
+    </body>
         <script type="text/javascript">
         	var socket = io.connect('/');
+            var token = null;
         	socket.on("server", function(data){
-        		console.log(data);
+                token = data.token;
+        		console.log(data,"====");
         	})
             socket.on("new message", function(data){
                 console.log(data);
             })
+            // $.get("/data",{}, function(data, status){
+            //  console.log(data);
+            // })
 
+            $('#getWithoutToken').click(function(){
+                console.log("clicked");
+                $.post("/data",{},function(data, status){
+                    console.log(data);
+                })
+            })
+
+            $('#getWithToken').click(function(){
+                $.post("/data", { token: token }, function(data, status){
+                    console.log(data);
+                })
+            })
         </script>
-    </head>
-    <body>
-    </body>
 </html>

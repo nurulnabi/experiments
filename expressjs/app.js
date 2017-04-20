@@ -6,17 +6,12 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var sessionService = require('./services/session/sessionService');
 var Channel = require('./services/channel/channel');
+var filter = require('./services/filter/filter');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
-
-//put the sessionService in the app to utilize it
-app.sessionService = new sessionService();
-
-//set the channel in the app
-app.channelService = Channel(app);
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -29,6 +24,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//put the sessionService in the app to utilize it
+app.sessionService = sessionService();
+
+//set the channel in the app
+app.channelService = Channel(app);
+
+//use the filter to plug the userId
+var filterInstance = filter();
+app.use(filterInstance.plugUserId.bind(app));
+
 
 app.use('/', index);
 app.use('/users', users);
