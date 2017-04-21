@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+        <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+        	var options = {
+        	  enableHighAccuracy: true,
+        	  timeout: 5000,
+        	  maximumAge: 0
+        	};
+
+        	function success(pos) {
+        	  var crd = pos.coords;
+
+        	  // console.log('Your current position is:');
+        	  // console.log(`Latitude : ${crd.latitude}`);
+        	  // console.log(`Longitude: ${crd.longitude}`);
+        	  // console.log(`More or less ${crd.accuracy} meters.`);
+        	  console.log(pos);
+        	};
+
+        	function error(err) {
+        	  console.warn(`ERROR(${err.code}): ${err.message}`);
+        	};
+
+        	navigator.geolocation.getCurrentPosition(success, error, options);
+        	console.log(navigator.geolocation);
+        	// var latLong;
+        	// $.getJSON("http://ipinfo.io", function(ipinfo){
+        	//     console.log(ipinfo);
+        	//     latLong = ipinfo.loc.split(",");
+        	//     console.log(latLong);
+        	// });
+        	// $.getJSON("http://ipinfo.io").then(function(data){
+        	// 	console.log(data);
+        	// })
+        	// console.log("after getJSON");
+        	// var loc = google.loader.ClientLocation;
+        	// loc = JSON.stringify(loc)
+        	// // loc = JSON.parse(loc)
+        	// console.log(loc, typeof );
+            </script>
+    </head>
+    <body>
+    </body>
+</html>

@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-20 12:05:02
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-20 18:01:46
+* @Last Modified time: 2017-04-21 14:43:05
 */
 
 var EventEmitter = require('events').EventEmitter;
@@ -15,6 +15,7 @@ var Session = function(sid, socket, service, expireAt){
 	this.uid 				= null;					// uid given to the user
 	this.userId 			= null;					// userId used internally to perfom operation
 	this.data 				= {};
+	this.lastRequest 		= new Date().getTime();
 	this.__state__ 			= ST_INITED;
 	this.__time__			= new Date().getTime();
 	this.__expireAt__		= expireAt || null;

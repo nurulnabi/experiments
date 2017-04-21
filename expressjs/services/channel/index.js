@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-20 15:55:59
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-20 17:33:35
+* @Last Modified time: 2017-04-21 11:33:30
 */
 
 
@@ -18,6 +18,14 @@ module.exports = function(server, app){
 	},5000);
 
 	allUser.on('connection', function(socket){
+		socket.use(function(packet, next){
+			console.log(packet,"Packet", typeof packet, packet.client);
+			next();
+		})
+		socket.on("client",function(data){
+			console.log(data,"From Client");
+		})
+		console.log(socket.conn);
 		// console.log(socket);
 		var session = sessionService.create(socket.conn.id, socket);
 		session.bind(socket.conn.id);

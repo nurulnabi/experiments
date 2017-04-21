@@ -19,6 +19,7 @@
             socket.on("new message", function(data){
                 console.log(data);
             })
+            socket.emit('client',"Hey Server")
             // $.get("/data",{}, function(data, status){
             //  console.log(data);
             // })
