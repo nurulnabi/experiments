@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-20 12:05:02
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-21 14:43:05
+* @Last Modified time: 2017-04-21 17:16:04
 */
 
 var EventEmitter = require('events').EventEmitter;
@@ -91,6 +91,13 @@ Session.prototype.clear = function(){
 
 Session.prototype.getUserId = function(){
 	return this.userId;
-}
+};
+
+Session.prototype.updateUid = function(uid){
+	this.uid = uid;
+	var self = this;
+	self.emit("uid updated", uid);
+	self.__socket__.emit("uid updated", { token: uid });
+};
 
 module.exports = Session;

@@ -2,10 +2,11 @@
 * @Author: noor
 * @Date:   2017-04-20 12:05:47
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-20 19:22:24
+* @Last Modified time: 2017-04-21 17:11:37
 */
 
 var Session = require('./session.js');
+var getUid 	= require('uuid');
 
 var SessionService = function(){
 	this.sessions = {}		// uid->session
@@ -55,6 +56,19 @@ SessionService.prototype.removeExpired = function(){
 			this.remove(uid, "Session Expired For: "+uid);
 		}
 	}
+};
+
+SessionService.prototype.removeUnactive = function(uid){
+	this.remove(uid, "Session Unactive For: "+uid);
+};
+
+SessionService.prototype.updateSessionUid = function(oldUid, newUid){
+	newUid = newUid || getUid();
+	var session = this.getByUid(oldUid);
+	delete this.sessions[oldUid];
+	this.sessions[newUid] = session;
+	session.updateUid(newUid);
+	return newUid;
 }
 
 module.exports = function(){

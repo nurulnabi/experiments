@@ -10,16 +10,17 @@
         <button id="getWithoutToken">getWithoutToken</button>
     </body>
         <script type="text/javascript">
-        	var socket = io.connect('/');
+        	var socket = io.connect('http://127.0.0.1:3000/');
             var token = null;
+
         	socket.on("server", function(data){
-                token = data.token;
         		console.log(data,"====");
+                token = data.token;
         	})
             socket.on("new message", function(data){
                 console.log(data);
             })
-            socket.emit('client',"Hey Server")
+            socket.emit('client',"Hey Server");
             // $.get("/data",{}, function(data, status){
             //  console.log(data);
             // })
@@ -27,13 +28,13 @@
             $('#getWithoutToken').click(function(){
                 console.log("clicked");
                 $.post("/data",{},function(data, status){
-                    console.log(data);
+                    console.log(data, status);
                 })
             })
 
             $('#getWithToken').click(function(){
                 $.post("/data", { token: token }, function(data, status){
-                    console.log(data);
+                    console.log(data, status);
                 })
             })
         </script>
