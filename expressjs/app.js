@@ -4,9 +4,7 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var sessionService = require('./services/session/sessionService');
-var Channel = require('./services/channel/channel');
-var filter = require('./services/filter/filter');
+var loader = require('./loader');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -25,16 +23,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-//put the sessionService in the app to utilize it
-app.sessionService = sessionService();
 
-//set the channel in the app
-app.channelService = Channel(app);
-
-//use the filter to plug the userId
-var filterInstance = filter();
-app.use(filterInstance.plugUserId.bind(app));
-
+//load all the required services
+loader(app);
 
 app.use('/', index);
 app.use('/users', users);
