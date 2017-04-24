@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    </head>
+    <body>
+        <button id="getWithToken">getWithToken</button>
+        <button id="getWithoutToken">getWithoutToken</button>
+    </body>
+        <script type="text/javascript">
+        	var socket = io.connect('http://127.0.0.1:3000/');
+            var token = null;
+
+        	socket.on("server", function(data){
+        		console.log(data,"====");
+                token = data.token;
+        	})
+            socket.on("new message", function(data){
+                console.log(data);
+            })
+            socket.emit('client',"Hey Server");
+            // $.get("/data",{}, function(data, status){
+            //  console.log(data);
+            // })
+
+            $('#getWithoutToken').click(function(){
+                console.log("clicked");
+                $.post("http://127.0.0.1:3000/data",{},function(data, status){
+                    console.log(data, status);
+                })
+            })
+
+            $('#getWithToken').click(function(){
+                $.post("http://127.0.0.1:3000/data", { token: token }, function(data, status){
+                    console.log(data, status);
+                })
+            })
+        </script>
+</html>

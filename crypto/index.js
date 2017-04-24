@@ -1,8 +1,8 @@
 /*
 * @Author: noor
 * @Date:   2017-04-19 12:15:25
-* @Last Modified by:   nurulnabi
-* @Last Modified time: 2017-04-24 01:46:53
+* @Last Modified by:   noor
+* @Last Modified time: 2017-04-24 10:35:41
 */
 
 var ursa = require('ursa');
@@ -13,9 +13,10 @@ var prvkey2 = ursa.createPrivateKey(keys.prvkey2);
 var pubkey1 = ursa.createPublicKey(keys.pubkey1);
 var pubkey2 = ursa.createPublicKey(keys.pubkey2);
 
-var msg = JSON.stringify({a:2});
+// var msg = ['noor']
+var msg = JSON.stringify(['noor','ansari']);
 var encrptd = pubkey2.encrypt(msg, 'utf8', 'base64')
-var sbuf = prvkey1.privateEncrypt(encrptd, 'utf8', 'base64')//, 'base64', 'utf8')
+// var sbuf = prvkey1.privateEncrypt(encrptd, 'utf8', 'base64')//, 'base64', 'utf8')
 
 // console.log(encrptd);
 // console.log(dencrptd);
