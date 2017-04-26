@@ -2,7 +2,7 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:21:11
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-20 11:52:43
+* @Last Modified time: 2017-04-26 17:42:11
 */
 
 var mongoose = require('mongoose');
@@ -77,7 +77,9 @@ personSchema.query.byAge = function(){
 
 var demo = new Schema({
     name: { type: String},
-    sub: Sub
+    city: { type: String},
+    status: { type: String },
+    walkingWith: String
 })
 // var personSchema = Schema({
 // 	_id: Number,
