@@ -2,7 +2,7 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:45:13
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-26 17:57:35
+* @Last Modified time: 2017-04-27 09:53:55
 */
 
 var mongoose = require('mongoose');
@@ -170,8 +170,15 @@ var demo = mongoose.model('demo');
 // 	console.log(doc);
 // })
 // 
-var ndemo = new demo();
-console.log(demo.toString());
-demo.update({ name: "kk" }, {$set:{ walkingWith: "ff"}, $setOnInsert:{ name:"kk", status:"single", city:"kota"}},{ upsert:true }, function(err, res){
-	console.log(err, res);
-})
+var ndemo = new demo({
+	name:"noor",
+	city:"noida",
+	status:"single"
+	,walkingWith:"none"
+});
+// console.log(demo.toString());
+// demo.update({ name: "kk" }, {$set:{ walkingWith: "ff"}, $setOnInsert:{ name:"kk", status:"single", city:"kota"}},{ upsert:true }, function(err, res){
+// 	console.log(err, res);
+// })
+// console.log(ndemo);
+// ndemo.save();

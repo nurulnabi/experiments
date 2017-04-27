@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <script type="text/javascript" src="javascripts/index.js"></script>
+        <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    </head>
+    <body>
+    	<button id="getData">Get Data</button>
+    </body>
+        <script type="text/javascript">
+        	$('#getData').click(function(){
+        		console.log("clicked");
+        		$.post("http://127.0.0.1:3000/data",{ data: "encrypted" }, function(res){
+        			console.log(res);
+        		})
+        	});
+        </script>
+</html>

@@ -2,10 +2,10 @@
 * @Author: noor
 * @Date:   2017-04-26 18:02:10
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-26 18:11:26
+* @Last Modified time: 2017-04-26 18:59:37
 */
 
-var socket = require('socket.io');
+var io = require('socket.io');
 module.exports = function(app){
 	return new sockAuth(app);
 };

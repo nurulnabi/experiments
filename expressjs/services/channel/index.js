@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-20 15:55:59
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-21 17:36:41
+* @Last Modified time: 2017-04-27 18:31:22
 */
 
 
@@ -16,7 +16,7 @@ module.exports = function(server, app){
 	app.socketConn = allUser;
 
 	allUser.on('connection', function(socket){
-
+		console.log(socket);
 		socket.on("client",function(data){
 			console.log(data,"From Client");
 		})

@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-19 12:15:25
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-24 10:35:41
+* @Last Modified time: 2017-04-27 16:28:42
 */
 
 var ursa = require('ursa');
@@ -27,6 +27,7 @@ var encrptd = pubkey2.encrypt(msg, 'utf8', 'base64')
 // msg2 = prvkey.decrypt(encrptd,'base64', 'utf8')
 
 // var msg2 = pubkey1.publicDecrypt(sbuf, 'base64', 'utf8')
+data = "r7H147PA4jtDvF3eYGxjwoR6wh0dGby0k4UCHW93VVRyXbRIbZNao7P6rRfhdWjZ0XgBfdbmYbxFOtgNvddNTXYDY5x4lH3U1EbzmSLmCow3khCa8FJgB/QbldYTKvJTlxdm9KocQ991WuTJe9lhUMHpcXzegCHpaZ/XdHcjPyoFEdKFwjeX0FlILE8Fnj74a+QuGZ1HCaChlXnna6o25BgMICkqBqRLU7nCMDUGBWchtPCJDkW7q+xOz2fwSMWh3WYNu72PESu44sSrUpZqhELguScmmKSSyymAnkwXXsbL8kVl7qzQqXIcPlBe0MpfxRe1THB7Hv+uS9SArO+Kkg=="
 var msg2 = prvkey2.decrypt(encrptd, 'base64', 'utf8')
 // var status = pubkey.hashAndVerify('sha512', encrptd, sbuf)
 // console.log(msg2);
