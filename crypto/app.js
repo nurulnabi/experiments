@@ -7,13 +7,13 @@ var bodyParser = require('body-parser');
 var useragent = require('useragent');
 var index = require('./routes/index');
 var users = require('./routes/users');
+var vSession = require('./vSession');
 
 var app = express();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
@@ -22,15 +22,19 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(function(req, res,next){
+  // console.log(req.socket._peername.address.split(":"));
+  console.log(req.socket._peername,"=============");
+  console.log(req);
 	// req._remoteAddress
-	var agent = useragent.parse(req.headers['user-agent'])
-	console.log(agent);
-	console.log(agent.toString());
-	console.log(agent.os);
-	console.log(agent.device);
+ //  console.log(req.headers.host.split(":")); 
+	// var agent = useragent.parse(req.headers['user-agent'])
+	// console.log(agent);
+	// console.log(agent.toString());
+	// console.log(agent.os);
+	// console.log(agent.device);
 	next();
 })
-
+vSession(app);
 app.use('/', index);
 app.use('/users', users);
 

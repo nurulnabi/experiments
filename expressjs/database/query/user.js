@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-04-28 11:31:23
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-28 12:42:37
+* @Last Modified time: 2017-04-28 16:45:37
 */
 
 var mongoose = require('mongoose');
@@ -22,6 +22,15 @@ module.exports = function(app){
 	};
 
 	this.loginAttempt = function(id, time){
-		return User.update({ _id: id }, { lastLogin: time }).exec();
+		var data = { 
+			$set:{ lastLogin: time },
+			$inc:{ invalidLoginAttempts: 1}
+		};
+		if(!time){		//this is valid login attemp
+			data['$set'].invalidLoginAttempts = 0,
+			delete data['$inc'];
+		}
+
+		return User.update({ _id: id, lastLogin:{ $lte: new Date().getTime() }}, data).exec();
 	};
 }
