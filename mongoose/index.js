@@ -2,16 +2,23 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:20:42
 * @Last Modified by:   noor
-* @Last Modified time: 2017-04-17 17:07:30
+* @Last Modified time: 2017-05-05 10:30:23
 */
 
 var mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
-var readySchema = require('./mongoose');
+// var readySchema = require('./mongoose');
 // var Person = mongoose.model("Person");
 // var Story = mongoose.model("Story");
-var users = require('./user');
+// var users = require('./user');
+// mongoose.connect("mongodb://localhost/demo");
+// var Schema = mongoose.Schema;
+// var Demo = mongoose.model("Demo", new Schema({}), "demos");
 
+// Demo.findOne({}, function(err, docs){
+// 	var doc = JSON.parse(JSON.stringify(docs))
+// 	console.log(doc.rup);
+// })
 
 // // Story
 // // 	.findOne({title: "Once Upon a Time"})

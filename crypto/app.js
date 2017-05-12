@@ -23,7 +23,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(function(req, res,next){
   // console.log(req.socket._peername.address.split(":"));
-  console.log(req.socket._peername,"=============");
+  // console.log(req.socket._peername,"=============");
   console.log(req);
 	// req._remoteAddress
  //  console.log(req.headers.host.split(":")); 
@@ -34,7 +34,7 @@ app.use(function(req, res,next){
 	// console.log(agent.device);
 	next();
 })
-vSession(app);
+// vSession(app);
 app.use('/', index);
 app.use('/users', users);
 
