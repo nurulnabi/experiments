@@ -2,50 +2,86 @@
 * @Author: noor
 * @Date:   2017-05-19 09:59:13
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-19 10:21:20
+* @Last Modified time: 2017-05-19 18:23:00
 */
 
 var deck = require('./deck');
-var getName = function(val, seq){
+var _ 	 = require('underscore');
+var hands = require('./hands');
+var getName = function(val, isInSeq, isSameSuit){
 	switch(val){
 		case 11111:
-			return "All Different";
+			if(isInSeq && isSameSuit){
+			  return "Straight Flush";
+			}else if(!isInSeq && isSameSuit){
+			  return "Flush";
+			}else if(isInSeq && !isSameSuit){
+			  return "Straight";
+			}else if(!isInSeq && !isSameSuit){
+			  return "High Card"
+			}
+			break;
 		case 41:
-			return "Four of A Kind";
 		case 14:
 			return "Four of A Kind";
+			break;
 		case 32:
-			return "Full House";
 		case 23:
 			return "Full House";
+			break;
 		case 113:
-			return "Three of A Kind";
 		case 131:
-			return "Three of A Kind";
 		case 311:
 			return "Three of A Kind";
+			break;
 		case 221:
-			return "Two Pair";
 		case 212:
-			return "Two Pair";
 		case 122:
 			return "Two Pair";
+			break;
 		case 2111:
-			return "One Pair";
 		case 1211:
-			return "One Pair";
 		case 1121:
+		case 1112:
 			return "One Pair";
+			break;
 	}
 }
 
 var assignType = function(set){
 	var result = {};
+	var isAcePresent = false;
+	var isInSeq = true;
+	var isSameSuit   = true;
+	var RF = { "A":true, "K":true, "Q":true, "J":true, "10":true };		//checks for royal flush
+	var rf = 0;	//count for royal flush cards
+	var seq = set[0].rank+1;	//check for sequence
+	var suit  		 = set[0].type;	//checks for suit
+	console.log(suit);
 	for(var name of set){
 		if(result[name.name] == undefined){
 			result[name.name] = 1;
 		}else{
 			result[name.name]++;
+		}
+
+		if(name.type != suit){
+			isSameSuit = false;
+		}
+
+		if(name.name == 'A'){
+			isAcePresent = true;
+		}
+
+		if(RF[name.name]){
+			delete RF[name.name];
+			rf++;
+		}
+
+		if(seq == (name.rank+1)){
+			seq++;
+		}else{
+			isInSeq = false;
 		}
 	}
 	var nameString = '';
@@ -54,8 +90,25 @@ var assignType = function(set){
 	}
 
 	console.log(nameString);
-	set.strength = getName(parseInt(nameString, 10));
-	return set;
+	if(rf == 5 && isSameSuit){
+		set.strength = "Royal Flush";
+	}else{
+		if(rf == 5){
+			isInSeq = true;
+		}
+		set.strength = getName(parseInt(nameString, 10),isInSeq, isSameSuit);
+	}
+	return {set:set, isAcePresent:isAcePresent, isSameSuit:isSameSuit, isInSeq:isInSeq} ;
+
 }
 
-console.log(assignType(deck.getRandomCards(5)));
+// var set = deck.getRandomCards(5);
+// for(var i=0; i<100; i++){
+for(var set of hands){
+	(function(set){
+		// var set = deck.getRandomCards(5);
+		set = _.sortBy(set,"rank");
+		console.log(assignType(set));
+		console.log("+++++++++++++++++++++++++++++++++");
+	})(set);
+}
