@@ -6,34 +6,47 @@
 
     </head>
     <body>
-    	<form id="form">
-    	<input type="text" id="myField" name="">
-    	<input type="submit" id="submit" name="">
-    	</form>
+    	<button id="btn">click me</button>
     </body>
     <script type="text/javascript">
-    	var promise1 = new Promise(function(resolve, reject) {
-                var xhr = new XMLHttpRequest();
-                var url = urls.urlListChapters.replace(0, specificationId);
-                xhr.open('GET', url, true);
-                xhr.responseType = 'json';
-                xhr.onload = function() {
-                    if (xhr.status === 200) {
-                        alert(xhr.response);
-                        resolve(xhr.response);
-                    } else {
-                        reject(new Error(xhr.statusText));
-                    }
-                };
-                xhr.onerror = function() {
-                    reject(new Error("Network error"));
-                };
-                xhr.send();
-            });
-            promise1.then(function(data) {
-                alert('Your public IP address is: ' + data);
-            }, function(status) {
-                alert('Something went wrong.');
-            });
+    	// var promise1 = new Promise(function(resolve, reject) {
+     //            var xhr = new XMLHttpRequest();
+     //            var url = urls.urlListChapters.replace(0, specificationId);
+     //            xhr.open('GET', url, true);
+     //            xhr.responseType = 'json';
+     //            xhr.onload = function() {
+     //                if (xhr.status === 200) {
+     //                    alert(xhr.response);
+     //                    resolve(xhr.response);
+     //                } else {
+     //                    reject(new Error(xhr.statusText));
+     //                }
+     //            };
+     //            xhr.onerror = function() {
+     //                reject(new Error("Network error"));
+     //            };
+     //            xhr.send();
+     //        });
+     //        promise1.then(function(data) {
+     //            alert('Your public IP address is: ' + data);
+     //        }, function(status) {
+     //            alert('Something went wrong.');
+     //        });
+     $('#btn').click(function(){
+        $.ajax({
+            url:"a.json",
+            success:function(res){
+                alert(res);
+            },
+            error: function (xhr, textStatus, errorThrown) {
+            //  Whoops! didn't work
+            console.log(textStatus);
+           }
+        })
+        
+     })
+        // ).done().catch(function(err){
+            // alert("error")
+        // })
     </script>
 </html>

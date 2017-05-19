@@ -2,7 +2,7 @@
 * @Author: MD NOORUL NABI ANSARI
 * @Date:   2017-03-23 16:20:42
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-05 10:30:23
+* @Last Modified time: 2017-05-18 18:20:52
 */
 
 var mongoose = require('mongoose');
@@ -51,4 +51,34 @@ mongoose.Promise = global.Promise;
 
 // Person.findAndModify({_id:201},[],{$set:p},{returnOriginal:true, upsert:true}, function(err, doc){
 // 	console.log(err, doc);
+// })
+// 
+mongoose.connect("mongodb://localhost:27017/demo");
+var Schema = mongoose.Schema;
+
+var personSchema = Schema({
+	_id: Number,
+	name:String,
+	roll:{
+		type:Number,
+		required: false
+	},
+	cal:Number
+});
+
+personSchema.pre('save', function(next){
+	this.cal = this.roll*1000;
+	next();
+});
+
+var ps = mongoose.model('Unit',personSchema);
+var doc = new ps({
+	_id:112, roll:555
+});
+
+doc.save(function(err, res){
+	console.log(err, res);
+})
+// ps.update({ _id:111 },{$setOnInsert:{name:'ansari'}},{upsert:true},function(err, res){
+// 	console.log(err,res);
 // })
