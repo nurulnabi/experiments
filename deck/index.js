@@ -2,22 +2,23 @@
 * @Author: noor
 * @Date:   2017-05-19 09:59:13
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-19 18:23:00
+* @Last Modified time: 2017-05-19 20:32:41
 */
 
 var deck = require('./deck');
 var _ 	 = require('underscore');
-var hands = require('./hands');
+var hands = require('./hands3');
+var other = require('./compr');
 var getName = function(val, isInSeq, isSameSuit){
 	switch(val){
 		case 11111:
 			if(isInSeq && isSameSuit){
 			  return "Straight Flush";
-			}else if(!isInSeq && isSameSuit){
+			} if(/*!isInSeq &&*/ isSameSuit){
 			  return "Flush";
-			}else if(isInSeq && !isSameSuit){
+			} if(isInSeq /*&& !isSameSuit*/){
 			  return "Straight";
-			}else if(!isInSeq && !isSameSuit){
+			} /*if(!isInSeq && !isSameSuit)*/{
 			  return "High Card"
 			}
 			break;
@@ -57,7 +58,7 @@ var assignType = function(set){
 	var rf = 0;	//count for royal flush cards
 	var seq = set[0].rank+1;	//check for sequence
 	var suit  		 = set[0].type;	//checks for suit
-	console.log(suit);
+	// console.log(suit);
 	for(var name of set){
 		if(result[name.name] == undefined){
 			result[name.name] = 1;
@@ -89,7 +90,7 @@ var assignType = function(set){
 		nameString = nameString+result[name];
 	}
 
-	console.log(nameString);
+	// console.log(nameString);
 	if(rf == 5 && isSameSuit){
 		set.strength = "Royal Flush";
 	}else{
@@ -103,12 +104,37 @@ var assignType = function(set){
 }
 
 // var set = deck.getRandomCards(5);
-// for(var i=0; i<100; i++){
-for(var set of hands){
-	(function(set){
-		// var set = deck.getRandomCards(5);
+var arr1 = [];
+var arr2 = [];
+var sum1 = 0;
+var sum2 = 0;
+for(var i=0; i<=0; i++){
+	(function(){
+		var set = deck.getRandomCards(5);
 		set = _.sortBy(set,"rank");
-		console.log(assignType(set));
-		console.log("+++++++++++++++++++++++++++++++++");
-	})(set);
+		var d =new Date().getTime();
+		var a = assignType(set).set.strength;
+		d = new Date().getTime()-d;
+		var t1,t2;
+		t2 = new Date().getTime();
+		var b = other(set).type;
+		t1 = new Date().getTime()-t2;
+
+		arr1.push({a:a.toLowerCase(),b: b.toLowerCase()});
+		sum1 = sum1+d;
+		sum2 = sum2+t1;
+		// arr2.push(t1-d)
+
+		// console.log(assignType(set).set.strength);
+	})();
 }
+
+console.log(JSON.stringify(arr1));
+console.log(sum2-sum1);
+
+// var arr = [];
+// for(var i=0; i<=100000; i++){
+// 	var set = deck.getRandomCards(5);
+// 	arr.push(set);
+// }
+// console.log(arr);
