@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 11:02:51
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-22 20:05:35
+* @Last Modified time: 2017-05-22 20:10:52
 */
 
 var numToType = require('./numToType');
@@ -55,9 +55,12 @@ function getFrequency(string) {
 
 function uniqObj(objArr){return objArr.reduce(function(memo, item){
 		// var nItem = Object.assign({}, item);
+		console.log(item);
 		var type = item['type'];
+		console.log(type);
 		delete item['type']
 		if(_.where(memo, item).length == 0){
+			console.log(type);
 			item.type = type;
 			memo.push(item);
 		}
