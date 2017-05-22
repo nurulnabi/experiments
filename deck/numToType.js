@@ -2,19 +2,19 @@
 * @Author: noor
 * @Date:   2017-05-22 10:29:26
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-22 15:50:34
+* @Last Modified time: 2017-05-22 18:58:51
 */
 
 module.exports = {
-	"211111": "One Pair",
-	"22111":"Two Pair",
-	"2221":"Two Pair",
-	"31111":"Three of a Kind",
-	"3211":"Full House",
-	"322":"Full House",
-	"331":"Full House",
-	"4111":"Four of a Kind",
-	"421":"Four of a Kind",
-	"43":"Four of a kind",
-	"1111111":"High Card"
+	"211111":{ type: "One Pair", strength: 2},
+	"22111":{ type:"Two Pair", strength: 3},
+	"2221":{ type:"Two Pair", strength: 3},
+	"31111":{ type:"Three of a Kind", strength: 4 },
+	"3211":{ type:"Full House", strength: 7},
+	"322":{ type:"Full House", strength: 7},
+	"331":{ type:"Full House", strength: 7},
+	"4111":{ type:"Four of a Kind", strength: 8},
+	"421":{ type:"Four of a Kind", strength: 8},
+	"43":{ type:"Four of a kind", strength: 8},
+	"1111111":{ type:"High Card", strength: 1}
 }

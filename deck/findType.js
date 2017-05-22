@@ -2,26 +2,32 @@
 * @Author: noor
 * @Date:   2017-05-22 15:59:22
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-22 18:36:01
+* @Last Modified time: 2017-05-22 19:30:40
 */
 
 var handObject = require('./handGenerator.js');
+var hands = require('./hands');
 var deck = require('./deck');
 
-function getCards(resultObj, nameString, isSameSuit, isInSeq){
+function getCards(resultObj, nameString, isSameSuit, isInSeq, isRF){
 	var resObj = {};
 	if(isSameSuit && isInSeq){
-		resObj.type  = "Royal Flush";
-		resObj.cards = handObject.cardsFromHandType[resObj.type.toLowerCase()](resultObj, nameString);
+		if(isRF == 5){
+			resObj.handInfo  = { type: "Royal Flush", strength:0 };
+			resObj.cards = handObject.cardsFromHandType[resObj.handInfo.type.toLowerCase()](resultObj, nameString);
+		}else{
+			resObj.handInfo  = { type: "Straight Flush", strength:10 };
+			resObj.cards = handObject.cardsFromHandType[resObj.handInfo.type.toLowerCase()](resultObj, nameString);
+		}
 	}else if(isSameSuit && !isInSeq){
-		resObj.type  = "Flush";
-		resObj.cards =  handObject.cardsFromHandType[resObj.type.toLowerCase()](resultObj, nameString);
+		resObj.handInfo  = { type: "Flush", strength:6 };
+		resObj.cards =  handObject.cardsFromHandType[resObj.handInfo.type.toLowerCase()](resultObj, nameString);
 	}else if(!isSameSuit && isInSeq){
-		resObj.type  = "Straight";
-		resObj.cards = handObject.cardsFromHandType[resObj.type.toLowerCase()](resultObj, nameString);
+		resObj.handInfo  = { type: "Straight", strength: 5};
+		resObj.cards = handObject.cardsFromHandType[resObj.handInfo.type.toLowerCase()](resultObj, nameString);
 	}else{
-		resObj.type  = handObject.memoOfHandTypes[nameString];
-		resObj.cards = handObject.cardsFromHandType[resObj.type.toLowerCase()](resultObj, nameString);
+		resObj.handInfo  = handObject.memoOfHandTypes[nameString];
+		resObj.cards = handObject.cardsFromHandType[resObj.handInfo.type.toLowerCase()](resultObj, nameString);
 	}
 	return resObj;
 }
@@ -37,9 +43,10 @@ var assignType = function(set){
 	// console.log(suit);
 	for(var card of set){
 		if(result[card.name] == undefined){
-			result[card.name] = {count:1, card:card}
+			result[card.name] = {count:1, cards:[card]}
 		}else{
 			result[card.name].count++;
+			result[card.name].cards.push(card);
 		}
 
 		if(card.type != suit){
@@ -74,13 +81,29 @@ var assignType = function(set){
 			isInSeq = true;
 		}
 	}
-	return getCards(resultObj, nameString, isSameSuit, isInSeq);
+	return getCards(result, nameString, isSameSuit, isInSeq, rf);
 	// return {strength:handObject.memoOfHandTypes[nameString], cards:handObject.cardsFromHandType[set.strength.toLowerCase()](result, nameString), set:set } ;
 
 }
 
-var set = deck.getRandomCards(7);
-var data = assignType(set)
-console.log(data.set);
-console.log((data.cards));
-console.log((data.strength));
+// var set = deck.getRandomCards(7);
+// var data = assignType(set)
+// console.log("===============set===================");
+// console.log(set);
+// console.log("===============cards===================");
+// console.log((data.cards));
+// console.log("===============type===================");
+// console.log((data.type));
+
+
+for(var set of hands){
+	var data = assignType(set)
+	// console.log("===============set===================");
+	// console.log(set);
+	console.log("===============cards===================");
+	console.log((data.cards));
+	console.log("===============type===================");
+	console.log((data.handInfo));
+	console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+	// console.log(set.length);
+}
