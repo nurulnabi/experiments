@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 15:59:22
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-22 19:30:40
+* @Last Modified time: 2017-05-23 10:01:54
 */
 
 var handObject = require('./handGenerator.js');
@@ -96,14 +96,54 @@ var assignType = function(set){
 // console.log((data.type));
 
 
-for(var set of hands){
-	var data = assignType(set)
-	// console.log("===============set===================");
-	// console.log(set);
-	console.log("===============cards===================");
-	console.log((data.cards));
-	console.log("===============type===================");
-	console.log((data.handInfo));
-	console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-	// console.log(set.length);
-}
+// for(var set of hands){
+// 	var data = assignType(set)
+// 	// console.log("===============set===================");
+// 	// console.log(set);
+// 	console.log("===============cards===================");
+// 	console.log((data.cards));
+// 	console.log("===============type===================");
+// 	console.log((data.handInfo));
+// 	console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+// 	// console.log(set.length);
+// }
+
+var set = [ { id: 0.6070262042339891,
+       type: 'p',
+       rank: 1,
+       name: 'A',
+       priority: 14 },
+     { id: 0.9671132233925164,
+       type: 'heart',
+       rank: 13,
+       name: 'K',
+       priority: 13 },
+     { id: 0.8098088204860687,
+       type: 'heart',
+       rank: 12,
+       name: 'Q',
+       priority: 12 },{ id: 0.8098088204860687,
+       type: 'heart',
+       rank: 5,
+       name: '5',
+       priority: 5 },
+     { id: 0.6182263130322099,
+       type: 'heart',
+       rank: 11,
+       name: 'J',
+       priority: 11 },
+     { id: 0.4390297264326364,
+       type: 'heart',
+       rank: 10,
+       name: '10',
+       priority: 10 },{ id: 0.4390297264326364,
+       type: 'spade',
+       rank: 3,
+       name: '3',
+       priority: 3 },
+  ]
+
+  var data = assignType(set)
+  console.log(data.handInfo);
+  console.log("+++++++++++++++++++++++");
+  console.log(data.cards);

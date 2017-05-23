@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 11:02:51
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-22 20:10:52
+* @Last Modified time: 2017-05-23 14:34:43
 */
 
 var numToType = require('./numToType');
@@ -53,19 +53,51 @@ function getFrequency(string) {
     return freq;
 };
 
-function uniqObj(objArr){return objArr.reduce(function(memo, item){
-		// var nItem = Object.assign({}, item);
-		console.log(item);
-		var type = item['type'];
-		console.log(type);
-		delete item['type']
-		if(_.where(memo, item).length == 0){
-			console.log(type);
-			item.type = type;
-			memo.push(item);
+function uniqObj(cards){
+	var setObj = {
+		names:[],
+		cards:[]
+	};
+	for(var card of cards){
+		if(setObj.names.indexOf(card.name) < 0){
+			setObj.cards.push(card);
+			setObj.names.push(card.name);
 		}
-		return memo;
-	},[]);
+	}
+	return setObj.cards;
+}
+
+function checkRF(cards){
+	var RF = { "A":true, "K":true, "Q":true, "J":true, "10":true };		//checks for royal flush
+	var rf = 0;
+	for(var card of cards){
+		if(RF[card.name]){
+			delete RF[card.name];
+			rf++;
+		}
+	}
+	return rf == 5 ? true : false;
+}
+
+var getNHighestCardsInSeq = function(n, cards, sortBy){
+	var tester = 0;
+	var set    = [];
+	var cards  = _.sortBy(cards,sortBy);
+	tester     = cards[0][sortBy];
+	for(var card of cards){
+		if(card[sortBy] == tester+1){
+		  tester = card[sortBy];
+		  set.push(card);
+		}else{
+		  if(set.length < n){
+		    set = [];
+		    set.push(card);
+		    tester = card[sortBy];
+		  }
+		}
+	};
+	var idx    = set.length - n;
+	return set.length < n ? [] : set.slice(idx, cards.length) ;
 }
 
 function getCardsWithEqualCount(cards){
@@ -171,7 +203,8 @@ var cardsFromHandType = {
 			tmpSet = tmpSet.concat(resultObj[key].cards)
 		}
 
-		return getNHighest(tmpSet, 5, "rank");
+		var uniqCards = uniqObj(tmpSet);
+		return uniqCards.length == 5 ? uniqCards : getNHighest(uniqCards, 5, "rank");
 	},
 	"straight":function(resultObj, nameString){
 		var tmpSet = [];
@@ -179,7 +212,12 @@ var cardsFromHandType = {
 			tmpSet = tmpSet.concat(resultObj[key].cards)
 		}
 
-		return getNHighest(tmpSet, 5, "rank");
+		var uniqCards = uniqObj(tmpSet);
+		// var cardsWithPriority = getNHighest(uniqCards, 5, "priority");	//in case cards of Royal Flush
+		// var cardsWithRank = getNHighest(uniqCards, 5, "rank");			//everything else
+		
+		// var uniqCards = checkRF(uniqCards) ? getNHighest(uniqCards, 5, "priority") : getNHighest(uniqCards, 5, "rank");
+		return uniqCards.length == 5 ? uniqCards : checkRF(uniqCards) ? getNHighest(uniqCards, 5, "priority") : getNHighest(uniqCards, 5, "rank");
 	},
 	"flush":function(resultObj, nameString){
 		var tmpSet = [];
@@ -187,7 +225,8 @@ var cardsFromHandType = {
 			tmpSet = tmpSet.concat(resultObj[key].cards)
 		}
 
-		return getNHighest(tmpSet, 5, "priority");
+		var uniqCards = uniqObj(tmpSet);
+		return uniqCards.length == 5 ? uniqCards : getNHighest(uniqCards, 5, "priority");
 	},
 	"royal flush":function(resultObj, nameString){
 		var tmpSet = [];
@@ -195,7 +234,8 @@ var cardsFromHandType = {
 			tmpSet = tmpSet.concat(resultObj[key].cards)
 		}
 
-		return getNHighest(tmpSet, 5, "priority");
+		var uniqCards = uniqObj(tmpSet);
+		return uniqCards.length == 5 ? uniqCards : getNHighest(uniqCards, 5, "priority");
 	}
 }
 
