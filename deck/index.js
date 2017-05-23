@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-19 09:59:13
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-19 20:32:41
+* @Last Modified time: 2017-05-23 19:52:50
 */
 
 var deck = require('./deck');
@@ -104,37 +104,37 @@ var assignType = function(set){
 }
 
 // var set = deck.getRandomCards(5);
-var arr1 = [];
-var arr2 = [];
-var sum1 = 0;
-var sum2 = 0;
-for(var i=0; i<=0; i++){
-	(function(){
-		var set = deck.getRandomCards(5);
-		set = _.sortBy(set,"rank");
-		var d =new Date().getTime();
-		var a = assignType(set).set.strength;
-		d = new Date().getTime()-d;
-		var t1,t2;
-		t2 = new Date().getTime();
-		var b = other(set).type;
-		t1 = new Date().getTime()-t2;
+// var arr1 = [];
+// var arr2 = [];
+// var sum1 = 0;
+// var sum2 = 0;
+// for(var i=0; i<=0; i++){
+// 	(function(){
+// 		var set = deck.getRandomCards(5);
+// 		set = _.sortBy(set,"rank");
+// 		var d =new Date().getTime();
+// 		var a = assignType(set).set.strength;
+// 		d = new Date().getTime()-d;
+// 		var t1,t2;
+// 		t2 = new Date().getTime();
+// 		var b = other(set).type;
+// 		t1 = new Date().getTime()-t2;
 
-		arr1.push({a:a.toLowerCase(),b: b.toLowerCase()});
-		sum1 = sum1+d;
-		sum2 = sum2+t1;
-		// arr2.push(t1-d)
+// 		arr1.push({a:a.toLowerCase(),b: b.toLowerCase()});
+// 		sum1 = sum1+d;
+// 		sum2 = sum2+t1;
+// 		// arr2.push(t1-d)
 
-		// console.log(assignType(set).set.strength);
-	})();
-}
-
-console.log(JSON.stringify(arr1));
-console.log(sum2-sum1);
-
-// var arr = [];
-// for(var i=0; i<=100000; i++){
-// 	var set = deck.getRandomCards(5);
-// 	arr.push(set);
+// 		// console.log(assignType(set).set.strength);
+// 	})();
 // }
-// console.log(arr);
+
+// console.log(JSON.stringify(arr1));
+// console.log(sum2-sum1);
+
+var arr = [];
+for(var i=0; i<=10000; i++){
+	var set = deck.getRandomCards(7);
+	arr.push(set);
+}
+console.log(arr);

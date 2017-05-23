@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 11:02:51
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-23 14:34:43
+* @Last Modified time: 2017-05-23 19:46:55
 */
 
 var numToType = require('./numToType');
@@ -84,12 +84,14 @@ var getNHighestCardsInSeq = function(n, cards, sortBy){
 	var set    = [];
 	var cards  = _.sortBy(cards,sortBy);
 	tester     = cards[0][sortBy];
+	set.push(cards[0]);
+
 	for(var card of cards){
 		if(card[sortBy] == tester+1){
 		  tester = card[sortBy];
 		  set.push(card);
 		}else{
-		  if(set.length < n){
+		  if(set.length < n && card[sortBy] != tester){
 		    set = [];
 		    set.push(card);
 		    tester = card[sortBy];
@@ -204,7 +206,7 @@ var cardsFromHandType = {
 		}
 
 		var uniqCards = uniqObj(tmpSet);
-		return uniqCards.length == 5 ? uniqCards : getNHighest(uniqCards, 5, "rank");
+		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "rank");
 	},
 	"straight":function(resultObj, nameString){
 		var tmpSet = [];
@@ -213,11 +215,7 @@ var cardsFromHandType = {
 		}
 
 		var uniqCards = uniqObj(tmpSet);
-		// var cardsWithPriority = getNHighest(uniqCards, 5, "priority");	//in case cards of Royal Flush
-		// var cardsWithRank = getNHighest(uniqCards, 5, "rank");			//everything else
-		
-		// var uniqCards = checkRF(uniqCards) ? getNHighest(uniqCards, 5, "priority") : getNHighest(uniqCards, 5, "rank");
-		return uniqCards.length == 5 ? uniqCards : checkRF(uniqCards) ? getNHighest(uniqCards, 5, "priority") : getNHighest(uniqCards, 5, "rank");
+		return uniqCards.length == 5 ? uniqCards : checkRF(uniqCards) ? getNHighestCardsInSeq(5, uniqCards, "priority") : getNHighestCardsInSeq(5, uniqCards, "rank");
 	},
 	"flush":function(resultObj, nameString){
 		var tmpSet = [];
@@ -235,7 +233,7 @@ var cardsFromHandType = {
 		}
 
 		var uniqCards = uniqObj(tmpSet);
-		return uniqCards.length == 5 ? uniqCards : getNHighest(uniqCards, 5, "priority");
+		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "priority");
 	}
 }
 
