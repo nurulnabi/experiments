@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 11:02:51
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-24 15:27:07
+* @Last Modified time: 2017-05-24 20:05:53
 */
 
 var numToType = require('./numToType');
@@ -207,7 +207,7 @@ var cardsFromHandType = {
 	},
 	"straight flush":function(resultObj, nameString, sameSuitCards){
 		var uniqCards = uniqObj(sameSuitCards);
-		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "rank").reverse();
+		return getNHighestCardsInSeq(5, uniqCards, "rank").reverse();
 	},
 	"straight":function(resultObj, nameString){
 		var tmpSet = [];
@@ -216,15 +216,15 @@ var cardsFromHandType = {
 		}
 
 		var uniqCards = uniqObj(tmpSet);
-		return uniqCards.length == 5 ? uniqCards : checkRF(uniqCards) ? getNHighestCardsInSeq(5, uniqCards, "priority").reverse() : getNHighestCardsInSeq(5, uniqCards, "rank").reverse();
+		return checkRF(uniqCards) ? getNHighestCardsInSeq(5, uniqCards, "priority").reverse() : getNHighestCardsInSeq(5, uniqCards, "rank").reverse();
 	},
 	"flush":function(resultObj, nameString, sameSuitCards){
 		var uniqCards = uniqObj(sameSuitCards);
-		return uniqCards.length == 5 ? uniqCards : getNHighest(uniqCards, 5, "priority");
+		return getNHighest(uniqCards, 5, "priority");
 	},
 	"royal flush":function(resultObj, nameString, sameSuitCards){
 		var uniqCards = uniqObj(sameSuitCards);
-		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "priority").reverse();
+		return getNHighestCardsInSeq(5, uniqCards, "priority").reverse();
 	}
 }
 
