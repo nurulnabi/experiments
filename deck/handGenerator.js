@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 11:02:51
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-24 13:04:48
+* @Last Modified time: 2017-05-24 15:27:07
 */
 
 var numToType = require('./numToType');
@@ -25,11 +25,27 @@ var createMemo = function(){
 createMemo();
 // console.log(memoOfHandTypes);
 
-var getNHighest = function(cards, n, sortBy){
-	var sidx = cards.length - n;
-	var set = _.sortBy(cards,sortBy);
-	return set.slice(sidx,set.length);
-};
+// var getNHighest = function(cards, n, sortBy){
+// 	var sidx = cards.length - n;
+// 	var set = _.sortBy(cards,sortBy);
+
+// 	return set.slice(sidx,set.length);
+// };
+
+function getNHighest(cards, n, sortBy){	//sorts in decreasing order
+	var key, j, status;
+	sortBy = sortBy || "priority";
+	for (var i = 1; i < cards.length; i++){
+	   key = cards[i];
+	   j = i-1;
+	   while (j >= 0 && cards[j][sortBy] < key[sortBy]){
+	       cards[j+1] = cards[j];
+	       j = j-1;
+	   }
+	   cards[j+1] = key;
+	}
+	return cards.slice(0, n);
+}
 
 var putCardsInSet = function(cards){
 	var set = [];
@@ -121,18 +137,16 @@ var cardsFromHandType = {
 	"one pair": function(resultObj, nameString){
 		var set = [];
 		var cards = getCardsWithEqualCount(resultObj);
-		// console.log("getCardsWithEqualCount in one pair", cards);
 		set = set.concat(cards['2']);
-		return set.concat(getNHighest(cards['1'], 3));
+		return set.concat(getNHighest(cards['1'], 3, "priority"));
 	},
 	"two pair":function(resultObj, nameString){
 		var set = [];
 		var freq = getFrequency(nameString);
 		var cards = getCardsWithEqualCount(resultObj);
-		// console.log("getCardsWithEqualCount in two pair", cards);
 
 		if(freq['2'] == 2 && freq['1'] == 3){
-			set = set.concat(cards['2']);
+			set = set.concat(getNHighest(cards['2'], 4, "priority"));
 			set = set.concat(_.max(cards['1'], function(o){ return o.priority }));
 			return set;
 		}
@@ -146,7 +160,6 @@ var cardsFromHandType = {
 	"three of a kind":function(resultObj, nameString){
 		var set = [];
 		var cards = getCardsWithEqualCount(resultObj);
-		// console.log("getCardsWithEqualCount in three of a kind", cards);
 
 		set = set.concat(cards['3']);
 		return set.concat(getNHighest(cards['1'], 2, "priority"));
@@ -154,7 +167,6 @@ var cardsFromHandType = {
 	"full house":function(resultObj, nameString){
 		var freq = getFrequency(nameString);
 		var cards = getCardsWithEqualCount(resultObj);
-		// console.log("getCardsWithEqualCount full house", cards);
 
 		var set = [];
 		if(freq['3'] == 1 && freq['2'] == 1){
@@ -168,13 +180,10 @@ var cardsFromHandType = {
 			return set;
 		}
 		if(freq['3'] == 2 && freq['1'] == 1){
-			var maxCard = _.max(cards['3'], function(o){ return o.priority });
+			set 		= getNHighest(cards['3'], 3, "priority");
 			var minCard = _.min(cards['3'], function(o){ return o.priority });
-			var count = 0;
+			var count 	= 0;
 			for(var obj of cards['3']){
-				if( obj.priority == maxCard.priority){
-					set.push(obj);
-				}
 				if(obj.priority == minCard.priority && count < 2){
 					set.push(obj);
 					count++;
@@ -185,29 +194,20 @@ var cardsFromHandType = {
 	},
 	"four of a kind":function(resultObj, nameString){
 		var cards = getCardsWithEqualCount(resultObj);
-		// console.log("getCardsWithEqualCount four of a kind", cards);
 
 		var set   = [];
 		set = set.concat(cards['4']);
-		// console.log(set, cards['4']);
 		var tmpCards = [];
 		for(var key in cards){
 			if(key != '4')
 				tmpCards = tmpCards.concat(cards[key]);
 		}
 		set = set.concat(_.max(tmpCards, function(o){ return o.priority }));
-		// console.log(tmpCards);
-		// console.log(set);
 		return set;
 	},
-	"straight flush":function(resultObj, nameString){
-		var tmpSet = [];
-		for(var key in resultObj){
-			tmpSet = tmpSet.concat(resultObj[key].cards)
-		}
-
-		var uniqCards = uniqObj(tmpSet);
-		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "rank");
+	"straight flush":function(resultObj, nameString, sameSuitCards){
+		var uniqCards = uniqObj(sameSuitCards);
+		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "rank").reverse();
 	},
 	"straight":function(resultObj, nameString){
 		var tmpSet = [];
@@ -216,25 +216,15 @@ var cardsFromHandType = {
 		}
 
 		var uniqCards = uniqObj(tmpSet);
-		return uniqCards.length == 5 ? uniqCards : checkRF(uniqCards) ? getNHighestCardsInSeq(5, uniqCards, "priority") : getNHighestCardsInSeq(5, uniqCards, "rank");
+		return uniqCards.length == 5 ? uniqCards : checkRF(uniqCards) ? getNHighestCardsInSeq(5, uniqCards, "priority").reverse() : getNHighestCardsInSeq(5, uniqCards, "rank").reverse();
 	},
-	"flush":function(resultObj, nameString){
-		var tmpSet = [];
-		for(var key in resultObj){
-			tmpSet = tmpSet.concat(resultObj[key].cards)
-		}
-
-		var uniqCards = uniqObj(tmpSet);
+	"flush":function(resultObj, nameString, sameSuitCards){
+		var uniqCards = uniqObj(sameSuitCards);
 		return uniqCards.length == 5 ? uniqCards : getNHighest(uniqCards, 5, "priority");
 	},
-	"royal flush":function(resultObj, nameString){
-		var tmpSet = [];
-		for(var key in resultObj){
-			tmpSet = tmpSet.concat(resultObj[key].cards)
-		}
-
-		var uniqCards = uniqObj(tmpSet);
-		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "priority");
+	"royal flush":function(resultObj, nameString, sameSuitCards){
+		var uniqCards = uniqObj(sameSuitCards);
+		return uniqCards.length == 5 ? uniqCards : getNHighestCardsInSeq(5, uniqCards, "priority").reverse();
 	}
 }
 
