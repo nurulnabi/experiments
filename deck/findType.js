@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 15:59:22
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-23 20:07:19
+* @Last Modified time: 2017-05-24 10:24:04
 */
 
 var handObject = require('./handGenerator.js');
@@ -14,10 +14,10 @@ function getCards(resultObj, nameString, isSameSuit, isInSeq, isRF){
 	var resObj = {};
 	if(isSameSuit && isInSeq){
 		if(isRF == 5){
-			resObj.handInfo  = { type: "Royal Flush", strength:0 };
+			resObj.handInfo  = { type: "Royal Flush", strength: 10 };
 			resObj.cards = handObject.cardsFromHandType[resObj.handInfo.type.toLowerCase()](resultObj, nameString);
 		}else{
-			resObj.handInfo  = { type: "Straight Flush", strength:10 };
+			resObj.handInfo  = { type: "Straight Flush", strength: 9 };
 			resObj.cards = handObject.cardsFromHandType[resObj.handInfo.type.toLowerCase()](resultObj, nameString);
 		}
 	}else if(isSameSuit && !isInSeq){
@@ -124,8 +124,8 @@ for(var hand of hands){
   for(var card of data.cards){
   	name = name+card.name;
   }
-  console.log(data.handInfo, name);
-  console.log("+++++++++++++++++++++++");
-  // console.log(data.cards);
+  // console.log(data.handInfo, !!name && name.length >= 5 ? name :"####" );
+  // console.log("+++++++++++++++++++++++");
+  console.log(data.cards);
 	
 }

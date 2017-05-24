@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 11:02:51
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-23 19:46:55
+* @Last Modified time: 2017-05-24 13:04:48
 */
 
 var numToType = require('./numToType');
@@ -171,10 +171,11 @@ var cardsFromHandType = {
 			var maxCard = _.max(cards['3'], function(o){ return o.priority });
 			var minCard = _.min(cards['3'], function(o){ return o.priority });
 			var count = 0;
-			for(var obj in cards['3']){
-				if( obj. priority == maxCard.priority)
+			for(var obj of cards['3']){
+				if( obj.priority == maxCard.priority){
 					set.push(obj);
-				if(obj.priority == minCard.priority && count <=2){
+				}
+				if(obj.priority == minCard.priority && count < 2){
 					set.push(obj);
 					count++;
 				}
