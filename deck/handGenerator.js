@@ -2,7 +2,7 @@
 * @Author: noor
 * @Date:   2017-05-22 11:02:51
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-24 20:05:53
+* @Last Modified time: 2017-05-25 18:10:31
 */
 
 var numToType = require('./numToType');
@@ -153,7 +153,8 @@ var cardsFromHandType = {
 		if(freq['2'] == 3 && freq['1'] == 1){
 			var tcards = getNHighest(cards['2'], 4, "priority");
 			set = set.concat(tcards);
-			set = set.concat(cards['1']);
+			var tmpMin = cards['1'].concat(_.min(cards['2'], function(o){ return o.priority }));
+			set = set.concat(_.max(tmpMin, function(o){ return o.priority }));
 			return set;
 		}
 	},
@@ -219,8 +220,7 @@ var cardsFromHandType = {
 		return checkRF(uniqCards) ? getNHighestCardsInSeq(5, uniqCards, "priority").reverse() : getNHighestCardsInSeq(5, uniqCards, "rank").reverse();
 	},
 	"flush":function(resultObj, nameString, sameSuitCards){
-		var uniqCards = uniqObj(sameSuitCards);
-		return getNHighest(uniqCards, 5, "priority");
+		return getNHighest(sameSuitCards, 5, "priority");
 	},
 	"royal flush":function(resultObj, nameString, sameSuitCards){
 		var uniqCards = uniqObj(sameSuitCards);

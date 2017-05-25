@@ -2,56 +2,64 @@
 * @Author: noor
 * @Date:   2017-05-22 15:59:22
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-24 20:12:47
+* @Last Modified time: 2017-05-25 19:23:35
 */
 
 var handObject = require('./handGenerator.js');
-var hands = require('./hands3');
-var deck = require('./deck');
+// var hands = require('./hands3');
+// var deck = require('./deck');
 var _ 	 = require('underscore');
-var async = require('async');
 
-function getCards(params, next){
-	params.resObj = {};
+function getCards(params){
+	params.hand = {};
 	if(params.isSameSuit && params.isInSeqInSS){
 		if(params.isRoyalFlushInSS){
-			params.resObj.handInfo  = { type: "Royal Flush", strength: 10 };
-			params.resObj.cards = handObject.cardsFromHandType[params.resObj.handInfo.type.toLowerCase()](params.resultObj, params.nameString, params.sameSuitCards);
+			params.hand.handInfo  = { type: "Royal Flush", strength: 10 };
+			params.hand.cards = handObject.cardsFromHandType[params.hand.handInfo.type.toLowerCase()](params.resultObj, params.nameString, params.sameSuitCards);
 		}else{
-			if(params.nameStr == "A234567"){
-				console.log(params);
-			}
-			params.resObj.handInfo  = { type: "Straight Flush", strength: 9 };
-			params.resObj.cards = handObject.cardsFromHandType[params.resObj.handInfo.type.toLowerCase()](params.resultObj, params.nameString, params.sameSuitCards);
+			params.hand.handInfo  = { type: "Straight Flush", strength: 9 };
+			params.hand.cards = handObject.cardsFromHandType[params.hand.handInfo.type.toLowerCase()](params.resultObj, params.nameString, params.sameSuitCards);
 		}
 	}else if(params.isSameSuit){
-		params.resObj.handInfo  = { type: "Flush", strength:6 };
-		params.resObj.cards =  handObject.cardsFromHandType[params.resObj.handInfo.type.toLowerCase()](params.resultObj, params.nameString, params.sameSuitCards);
+		params.hand.handInfo  = { type: "Flush", strength:6 };
+		params.hand.cards =  handObject.cardsFromHandType[params.hand.handInfo.type.toLowerCase()](params.resultObj, params.nameString, params.sameSuitCards);
 	}else if(params.isInSeq){
-		params.resObj.handInfo  = { type: "Straight", strength: 5};
-		params.resObj.cards = handObject.cardsFromHandType[params.resObj.handInfo.type.toLowerCase()](params.resultObj, params.nameString);
+		params.hand.handInfo  = { type: "Straight", strength: 5};
+		params.hand.cards = handObject.cardsFromHandType[params.hand.handInfo.type.toLowerCase()](params.resultObj, params.nameString);
 	}else{
-		params.resObj.handInfo  = handObject.memoOfHandTypes[params.nameString];
-		params.resObj.cards = handObject.cardsFromHandType[params.resObj.handInfo.type.toLowerCase()](params.resultObj, params.nameString);
+		params.hand.handInfo  = handObject.memoOfHandTypes[params.nameString];
+		params.hand.cards = handObject.cardsFromHandType[params.hand.handInfo.type.toLowerCase()](params.resultObj, params.nameString);
 	}
-	next(null, params);
 }
 
-function checkSameSuit(params, next){
+function uniqObj(cards){
+	var setObj = {
+		names:[],
+		cards:[]
+	};
+	for(var card of cards){
+		if(setObj.names.indexOf(card.name) < 0){
+			setObj.cards.push(card);
+			setObj.names.push(card.name);
+		}
+	}
+	return setObj.cards;
+}
+
+function checkSameSuit(params){
 	var suit = params.suit;
 	params.isSameSuit = false;
 	params.sameSuitCards = [];
 	for(var type in suit){
-		if(suit[type].length >= 5){
+		if(uniqObj(suit[type]).length >= 5){
 			params.isSameSuit = true;
 			params.sameSuitCards = suit[type];
 			break;
 		}
 	}
-	next(null, params);
 }
 
-function checkRFInSameSuit(params, next){
+function checkRFInSameSuit(params){
 	var cards = params.sameSuitCards;
 	var RF = { "A":true, "K":true, "Q":true, "J":true, "10":true };		//checks for royal flush
 	var rf = 0;
@@ -63,12 +71,11 @@ function checkRFInSameSuit(params, next){
 	}
 	params.isRoyalFlushInSS = rf == 5 ? true : false;
 	params.isInSeqInSS 		= cards.length >= 5 ? isCardsInSeq(cards) : false;
-	next(null, params);
+	params.isInSeqInSS 		= params.isRoyalFlushInSS || params.isInSeqInSS;
 }
 
 function checkDiffCardsInSeq(params, next){
 	params.isInSeq = params.isInSeq || isCardsInSeq(params.set) ? true : false;
-	next(null, params);
 }
 
 function isCardsInSeq(cards){
@@ -90,7 +97,7 @@ function isCardsInSeq(cards){
 	return seq >= 5 ? true : false;
 }
 
-var buildTypeString = function(params, next){
+var buildTypeString = function(params){
 	var suit = {};
 	var result = { };
 	var RF = { "A":true, "K":true, "Q":true, "J":true, "10":true };		//checks for royal flush cards
@@ -126,40 +133,39 @@ var buildTypeString = function(params, next){
 	for(var name in result){
 		params.nameString = params.nameString+result[name].count;
 	}
-	
+	// console.log(params.nameString);
 	//if royal flush cards present then cards are in sequence
 	if(rf == 5 ){
 		params.isInSeq = true;
 	}
-
-	// console.log(nameString, nameStr);
-	// console.log(rf, isSameSuit, isInSeq, nameString, seq);
-	// return getCards(result, nameString, isSameSuit, isInSeq, rf, sameSuitCards);
-	next(null, params);
 }
 
-var prepareHighHand = function(set){
-	var params = {};
-	params.set = set;
-	async.waterfall([
-			async.apply(buildTypeString, params),
-			checkSameSuit,
-			checkRFInSameSuit,
-			checkDiffCardsInSeq,
-			getCards
-		], function(err, params){
-			var cards = params.resObj.cards;
-			var name = '';
-			for(var card of cards){
-				name = name+card.name;
-			}
-			console.log(params.isSameSuit, params.isInSeq, params.nameString, params.nameStr, name);
-			console.log(params.resObj);
-			if(name == '3910JJQK' || params.nameStr == "3910JJQK" || params.nameString == "3910JJQK"){
-				console.log(params);
-				console.log("========================");
-			}
-		});
+var prepareHighHand = function(params){
+	// var params = {};
+	// params.set = set;
+	params.set = _.sortBy(params.set, "rank");
+	buildTypeString(params);
+	checkSameSuit(params);
+	checkRFInSameSuit(params);
+	checkDiffCardsInSeq(params);
+	getCards(params);
+	delete params.set;
+	delete params.isSameSuit;
+	delete params.isInSeqInSS;
+	delete params.sameSuitCards;
+	delete params.isInSeq;
+	delete params.nameString;
+	delete params.resultObj;
+	delete params.suit;
+	delete params.nameStr;
+	delete params.isRoyalFlushInSS;
+	// var cards = params.hand.cards;
+	// var name = '';
+	// for(var card of cards){
+	// 	name = name+card.name;
+	// }
+	// console.log(params.isSameSuit, params.isInSeq, params.nameString, params.nameStr, name);
+	// console.log(params.hand);
 }
  
 // var set = deck.getRandomCards(7);
@@ -185,16 +191,18 @@ var prepareHighHand = function(set){
 // 	// console.log(set.length);
 // }
 
-for(var hand of hands){
-  var set = _.sortBy(hand, "rank")
-  // var data = assignType(set);
-  // var name = '';
-  // for(var card of data.cards){
-  // 	name = name+card.name;
-  // }
-  // 	console.log(data.handInfo, !!name && name.length >= 5 ? name :"####" );
-  // 	// console.log(data.cards);
-  prepareHighHand(set);
-  	console.log("+++++++++++++++++++++++");
+// for(var hand of hands){
+//   var set = _.sortBy(hand, "rank")
+//   // var data = assignType(set);
+//   // var name = '';
+//   // for(var card of data.cards){
+//   // 	name = name+card.name;
+//   // }
+//   // 	console.log(data.handInfo, !!name && name.length >= 5 ? name :"####" );
+//   // 	// console.log(data.cards);
+//   prepareHighHand(set);
+//   	console.log("+++++++++++++++++++++++");
 	
-}
+// }
+
+module.exports = prepareHighHand;

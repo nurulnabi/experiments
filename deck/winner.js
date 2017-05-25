@@ -2,73 +2,109 @@
 * @Author: noor
 * @Date:   2017-05-24 10:00:31
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-24 12:52:48
+* @Last Modified time: 2017-05-25 19:45:49
 */
 
-var _		= require('underscore');
-var async	= require('async');
+var _					= require('underscore');
+var prepareHighHand		= require('./findType');
+var nameAndPriority		= require('./nameAndPriority');
 
-var groupCardsWithEqualRank = function(param, next){
+var prepareHighHandForEachPlayer = function(params){
+	params.handsArray = [];
+	for(var pCards of params.playerCards){
+		var tmpParams 	   = { set: []};
+		tmpParams.set 	   = params.boardCards.concat(pCards.cards);
+		tmpParams.set.forEach(function(card){
+			card.name 	  = nameAndPriority.getName(card.rank);
+			card.priority = nameAndPriority.getPriority(card.rank);
+		});
+		tmpParams.playerId = pCards.playerId;
+		prepareHighHand(tmpParams);
+		params.handsArray.push(tmpParams);
+	}
+}
+
+var groupCardsWithEqualRank = function(params){
 	groupedCards = {};
-	for(var card of param.cardsArray){
-		if(groupedCards[card.handInfo.strength]){
-			groupedCards[card.handInfo.strength].push(card);
+	for(var playerHand of params.handsArray){
+		if(groupedCards[playerHand.hand.handInfo.strength]){
+			groupedCards[playerHand.hand.handInfo.strength].push(playerHand);
 		}else{
-			groupedCards[card.handInfo.strength] = [ card ];
+			groupedCards[playerHand.hand.handInfo.strength] = [ playerHand ];
 		}
 	}
-	param.groupedCards = groupedCards;
-	next(null, param);
+	params.groupedCards = groupedCards;
 };
 
-var getHighestCards = function(param, next){
-	var groupedCards   = param.groupedCards;
-	var key 		   = _.max(Object.keys(groupedCards));
-	param.highestCards = groupedCards[key]
-	param.maxStrength  = key;
-	next(null,param);
+var getHighestCards = function(params){
+	var groupedCards   = params.groupedCards;
+	var keys 		   = [];
+	for(var k in groupedCards){
+		keys.push(parseInt(k));
+	}
+	var key 		   = _.max(keys);
+	params.highestCards = groupedCards[key]
+	params.maxStrength  = key; 
 };
 
-var decideWinner = function(param, next){
-	switch(parseInt(param.maxStrength, 10)){
-		case 1:
-			return highCardWinner(param, next);
-		case 2:
-			return onePairWinner(param, next);
-		case 3:
-			return twoPairWinner(param, next);
-		case 4:
-			return threeOfAKindWinner(param, next);
-		case 5:
-			return straightWinner(param, next);
-		case 6:
-			return flushWinner(param, next);
-		case 7:
-			return fullHouseWinner(param, next);
-		case 8:
-			return fourOfAKindWinner(param, next);
-		case 9:
-			return straightFlushWinner(param, next);
-		case 10:
-			return royalFlushWinner(param, next);
-		default:
-			throw new Error("Unable to decide winner").stack;
-	}
+// var decideWinner = function(param){
+// 	switch(parseInt(param.maxStrength, 10)){
+// 		case 1:
+// 			return highCardWinner(param);
+// 		case 2:
+// 			return onePairWinner(param);
+// 		case 3:
+// 			return twoPairWinner(param);
+// 		case 4:
+// 			return threeOfAKindWinner(param);
+// 		case 5:
+// 			return straightWinner(param);
+// 		case 6:
+// 			return flushWinner(param);
+// 		case 7:
+// 			return fullHouseWinner(param);
+// 		case 8:
+// 			return fourOfAKindWinner(param);
+// 		case 9:
+// 			return straightFlushWinner(param);
+// 		case 10:
+// 			return royalFlushWinner(param);
+// 		default:
+// 			throw new Error("Unable to decide winner").stack;
+// 	}
+// }
+
+var fingHighestHand = function(params, arr, idx){
+  var tester = -Infinity;
+  var status = false;
+  var tmpArr = [];
+  for(var i = 0; i<arr.length; i++){
+  	var checker = arr[i].hand.cards[idx].priority;
+    if( checker > tester){
+        tmpArr = [];
+        tester = arr[i].hand.cards[idx].priority;
+        tmpArr.push(arr[i]);
+
+      }else if(checker == tester)
+        tmpArr.push(arr[i]);
+  }
+  idx = idx+1;
+  // console.log("=================================");
+  // console.log(tmpArr[0].hand.cards);
+  // console.log("=================================");
+  if(idx == 5 || tmpArr.length == 1){
+    params.winner = tmpArr;
+    return;
+  }else
+  	fingHighestHand(params, tmpArr, idx);
+}	
+
+var decideWinner = function(params){
+	prepareHighHandForEachPlayer(params);
+	groupCardsWithEqualRank(params);
+	getHighestCards(params);
+	fingHighestHand(params, params.highestCards, 0);
+	return params.winner;
 }
 
-function getCardsSumBy(cards, sumBy){
-	var sum = 0;
-	for(var card of cards){
-		sum = sum + card[sumBy];
-	}
-	return sum;
-}
-
-function highCardWinner(param, next){
-	if(params.highestCards.length == 1){
-		params.winners = params.highestCards;
-		return next(null, param);
-	}else{
-		
-	}
-}
+module.exports = decideWinner;

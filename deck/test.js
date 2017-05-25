@@ -1,61 +1,114 @@
-var _ = require('underscore');
-var getNHighestCardsInSeq = function(n, cards, sortBy){
-  var tester = 0;
-  var set    = [];
-  var cards  = _.sortBy(cards,sortBy);
-  tester     = cards[0][sortBy];
-  set.push(cards[0]);
-  
-  for(var card of cards){
-    if(card[sortBy] == tester+1){
-      tester = card[sortBy];
-      set.push(card);
+var winner   = require('./winnerAlgo/entry');
+var myWinner = require('./winner');
+var hands    = require('./hands4.json')
+
+var params = {"boardCards":
+[
+  {"type":"heart","rank":10},
+  {"type":"diamond","rank":12},
+  {"type":"club","rank":11},
+  {"type":"diamond","rank":2},
+  {"type":"heart","rank":3 }
+],
+"playerCards":[ {"playerId":"59097377d717c019cfccfcaa","cards":[{"type":"spade","rank":11},{"type":"club","rank":3}]},
+{"playerId":"59097377d717c019cfccfcaa","cards":[{"type":"spade","rank":11},{"type":"club","rank":3}]}],
+"amount":1000,"potIndex":0,"winners":[],"winningAmount":0,"isRefund":false,"winningAmountAdded":false}
+
+// console.log(params);
+// console.log(winner);
+// console.log(winner.findBestHand(params));
+
+// var mySt = new Date().getTime();
+// var myResult = myWinner(params);
+// var myEt = new Date().getTime();
+// // myResult.forEach(function(card){
+// //   console.log(card.hand);
+// // })
+
+// // console.log("+++++++++++legacy++++++++++");
+// var result = winner.findWinner(params);
+// var et = new Date().getTime();
+// // result.forEach(function(card){
+// //   console.log(card);
+// // })
+
+function checkEquality(str1, str2){
+  var obj = {};
+  if(str1.length != str2.length){
+    console.log("length not equal");
+    return false;
+  }
+  for(var ch of str1){
+    if(str2.indexOf(ch) < 0){
+      console.log("ch not found: ", ch, str2);
+      return false
     }else{
-      if(set.length < n && card[sortBy] != tester){
-        set = [];
-        set.push(card);
-        tester = card[sortBy];
-      }
+      str2 = str2.replace(ch,'');
     }
-  };
-  var idx    = set.length - n;
-  return set.length < n ? [] : set.slice(idx, cards.length) ;
+  }
+  return true;
 }
 
-arr =     [ { id: 0.6070262042339891,
-       type: 'p',
-       rank: 4,
-       name: 'A',
-       priority: 4 },
-     { id: 0.9671132233925164,
-       type: 'heart',
-       rank: 1,
-       name: 'K',
-       priority: 14 },
-     { id: 0.8098088204860687,
-       type: 'heart',
-       rank: 3,
-       name: 'Q',
-       priority: 3 },
-     { id: 0.6182263130322099,
-       type: 'heart',
-       rank: 2,
-       name: 'J',
-       priority: 2 },
-     { id: 0.4390297264326364,
-       type: 'heart',
-       rank: 5,
-       name: '5',
-       priority: 5 },{ id: 0.4390297264326364,
-       type: 'heart',
-       rank: 7,
-       name: '7',
-       priority: 7 },{ id: 0.4390297264326364,
-       type: 'heart',
-       rank: 9,
-       name: '9',
-       priority: 9 },
-  ];
-  console.log(getNHighestCardsInSeq(5, arr, "rank"));
-  console.log("+++++++++++++++++++++++");
-  console.log(getNHighestCardsInSeq(5, arr, "priority"));
+function getNameString(cards){
+  var name = "";
+  cards.forEach( card => name+=card.name );
+  return name
+}
+// var set = winner.findWinner(params)[0]
+
+// console.log(getNameString(set.set));
+
+var count = 0;
+var numArr = [];
+var my = 0;
+var old = 0;
+for(var pCards of hands){
+  count++;
+  if(count <= 1000  )
+    {var mySt = new Date().getTime();
+        // console.log(count);
+        // 
+        // console.log(pCards.playerCards);
+        // console.log(pCards.boardCards);
+        // break;
+        var mySt = new Date().getTime();
+        var myResult = myWinner(pCards);
+        var myEt = new Date().getTime();
+        var result = winner.findWinner(pCards);
+        var et = new Date().getTime();
+        // console.log(obj);
+        // numArr.push({my: myEt-mySt, old: et- myEt});
+        my += myEt-mySt;
+        old += et-myEt;
+        var myStr = getNameString(myResult[0].hand.cards);
+        var str = getNameString(result[0].set);
+        // console.log(myStr, str);
+        // console.log(myResult[0].hand.handInfo.type, result[0].typeName);
+        // console.log(pCards.boardCards);
+        // pCards.playerCards.forEach(c => console.log(c))
+        // console.log("++++++++++++++++++");
+        // if(myResult[0].hand.handInfo.type == "Four of a Kind" || result[0].typeName == "Four of A Kind"){
+        //   console.log(myStr, str, myResult[0].hand, result[0]);
+        // }
+        if(!checkEquality(myStr, str) || myResult[0].hand.handInfo.type != result[0].typeName){
+          console.log("count: ", count);
+          console.log(myStr, str, myResult[0].hand, result[0]);
+        }}else  continue;
+
+}
+console.log(my, old);
+// var res  = myWinner(params);
+// console.log(res[0].hand);
+// console.log(res[1].hand);
+// console.log("=========================");
+// console.log(winner.findWinner(params)[0].set);
+// console.log(winner.findWinner(params)[1].set);
+
+// for(var pCards of hands){
+//   count++;
+//   if(count == 4442){
+//     console.log(pCards.boardCards);
+//     pCards.playerCards.forEach(c => console.log(c))
+//   }
+// }
+// console.log("my time: ", myEt-mySt, "legacy time: ", et-myEt);

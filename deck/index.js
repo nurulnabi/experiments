@@ -2,12 +2,12 @@
 * @Author: noor
 * @Date:   2017-05-19 09:59:13
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-23 19:52:50
+* @Last Modified time: 2017-05-25 20:02:41
 */
 
 var deck = require('./deck');
 var _ 	 = require('underscore');
-var hands = require('./hands3');
+var hands = require('./hands4');
 var other = require('./compr');
 var getName = function(val, isInSeq, isSameSuit){
 	switch(val){
@@ -132,9 +132,44 @@ var assignType = function(set){
 // console.log(JSON.stringify(arr1));
 // console.log(sum2-sum1);
 
-var arr = [];
-for(var i=0; i<=10000; i++){
-	var set = deck.getRandomCards(7);
-	arr.push(set);
-}
-console.log(arr);
+// console.log(deck.getCards());
+// console.log(deck.shuffle())
+// console.log(deck.getCards());
+// var deck1 = deck.getCards()
+// var arr = [];
+// for(var i=0; i<=15000; i++){
+// 	var wholeCard = { playerCards:[], boardCards:[]};
+// 	deck.shuffle();
+// 	deck1 = deck.getCards();
+// 	var n = 0;
+// 	for(var j=0; j<5; j++){
+// 		wholeCard.boardCards.push(deck1[n]);
+// 		n++;
+// 	}
+// 	// wholeCard.boardCards = deck.getRandomCards(5);
+// 	var rand =  Math.floor(Math.random()*6+1);
+// 	for(var k = 1; k<= rand; k++){
+// 		var card1 = deck1[n];
+// 		n++;
+// 		var card2 = deck1[n];
+// 		n++;
+// 		wholeCard.playerCards.push({
+// 			playerId: Math.floor(Math.random()*99999999+10000),
+// 			cards: [card1, card2]
+// 		});
+// 	}
+// 	arr.push(wholeCard);
+// }
+// console.log(JSON.stringify(arr));
+
+// function getNameString(cards){
+//   var name = "";
+//   cards.forEach( card => name+=card.name );
+//   return name
+// }
+// for(var hand of hands){
+// 	var cards = [];
+// 	for(var pCards of hand.playerCards){
+// 		console.log(getNameString(hand.boardCards.concat(cards.concat(pCards.cards))));
+// 	}
+// }
