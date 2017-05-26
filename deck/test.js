@@ -1,6 +1,6 @@
 var winner   = require('./winnerAlgo/entry');
 var myWinner = require('./winner');
-var hands    = require('./hands5.json')
+var hands    = require('./hands8.json')
 
 var params = {"boardCards":
 [
@@ -64,7 +64,7 @@ var my = 0;
 var old = 0;
 for(var pCards of hands){
   count++;
-  if(count )
+  if(count <= 1000)
     {var mySt = new Date().getTime();
         // console.log(count);
         // 
@@ -94,7 +94,7 @@ for(var pCards of hands){
           console.log("count: ", count);
           console.log(myStr, str, myResult[0].hand, result[0]);
         }
-      }else  continue;
+      }else  break
 
 }
 console.log(my, old, count);
