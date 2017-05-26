@@ -2,10 +2,12 @@
 * @Author: noor
 * @Date:   2017-05-22 15:59:22
 * @Last Modified by:   noor
-* @Last Modified time: 2017-05-25 19:23:35
+* @Last Modified time: 2017-05-26 15:34:15
 */
 
 var handObject = require('./handGenerator.js');
+var helper 	   = require('./helper');
+// var handType   = require('./numToType');
 // var hands = require('./hands3');
 // var deck = require('./deck');
 var _ 	 = require('underscore');
@@ -32,26 +34,12 @@ function getCards(params){
 	}
 }
 
-function uniqObj(cards){
-	var setObj = {
-		names:[],
-		cards:[]
-	};
-	for(var card of cards){
-		if(setObj.names.indexOf(card.name) < 0){
-			setObj.cards.push(card);
-			setObj.names.push(card.name);
-		}
-	}
-	return setObj.cards;
-}
-
 function checkSameSuit(params){
 	var suit = params.suit;
 	params.isSameSuit = false;
 	params.sameSuitCards = [];
 	for(var type in suit){
-		if(uniqObj(suit[type]).length >= 5){
+		if(helper.uniqObj(suit[type]).length >= 5){
 			params.isSameSuit = true;
 			params.sameSuitCards = suit[type];
 			break;
@@ -61,15 +49,7 @@ function checkSameSuit(params){
 
 function checkRFInSameSuit(params){
 	var cards = params.sameSuitCards;
-	var RF = { "A":true, "K":true, "Q":true, "J":true, "10":true };		//checks for royal flush
-	var rf = 0;
-	for(var card of cards){
-		if(RF[card.name]){
-			delete RF[card.name];
-			rf++;
-		}
-	}
-	params.isRoyalFlushInSS = rf == 5 ? true : false;
+	params.isRoyalFlushInSS = helper.checkRF(cards);
 	params.isInSeqInSS 		= cards.length >= 5 ? isCardsInSeq(cards) : false;
 	params.isInSeqInSS 		= params.isRoyalFlushInSS || params.isInSeqInSS;
 }
